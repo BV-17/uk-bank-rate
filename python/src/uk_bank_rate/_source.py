@@ -10,20 +10,13 @@ from typing import IO
 # ─── Local Application Imports ───────────────────────────────────────────────
 
 from uk_bank_rate._dates import as_date
+from uk_bank_rate._generated import SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT
 from uk_bank_rate._parse import parse_bank_rate_csv
 from uk_bank_rate._types import BankRateObservation, SourceFailure, Transport
 
 # ─── Constants ───────────────────────────────────────────────────────────────
 
-SERIES_ENDPOINT = "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp"
-
-SERIES_CODE = "IUDBEDR"
-
-SERIES_STARTS_ON = datetime.date(1975, 1, 2)
-
 DEFAULT_TIMEOUT_SECONDS = 15.0
-
-USER_AGENT = "uk-bank-rate (+https://github.com/BV-17/uk-bank-rate)"
 
 MONTH_ABBREVIATIONS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
@@ -65,11 +58,12 @@ class _RefuseRedirects(urllib.request.HTTPRedirectHandler):
     ) -> urllib.request.Request | None:
         return None
 
+_OPENER = urllib.request.build_opener(_RefuseRedirects)
+
 def urllib_transport(url: str, timeout: float) -> tuple[int, str]:
-    opener = urllib.request.build_opener(_RefuseRedirects)
     request = urllib.request.Request(url, headers={"Accept": "text/csv, application/csv", "User-Agent": USER_AGENT})
     try:
-        with opener.open(request, timeout=timeout) as response:
+        with _OPENER.open(request, timeout=timeout) as response:
             return response.status, response.read().decode("utf-8", errors="replace")
     except urllib.error.HTTPError as error:
         with error:
@@ -114,6 +108,6 @@ def fetch_bank_rate_observations(
         if isinstance(error.reason, TimeoutError):
             raise BankRateSourceError("timeout", timed_out) from error
         raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {error.reason}") from error
-    except OSError as error:
+    except Exception as error:
         raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {error}") from error
     return _read_series_body(status, body)

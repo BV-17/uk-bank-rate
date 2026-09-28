@@ -4,6 +4,20 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+### Added
+
+- `beyondSchedule` on every reading, set when the date asked about lies past both the published data and the last scheduled decision, so an answer the package cannot vouch for is no longer presented as settled
+
+### Fixed
+
+- The TypeScript decision checks now refuse a date that is not ISO, as the Python ones always did, rather than comparing it as text
+- A custom Python transport's own errors now arrive as a typed `network` failure instead of escaping untyped
+- An opaque redirect, which strict Fetch runtimes report with status 0, is now named as a redirect to the Bank's error page
+
+### Changed
+
+- The Bank's endpoint, series code, series start and user agent now come from one shared file, and the version check covers the lockfile and the README badge as well as both manifests
+
 ## [0.1.0] - 2026-09-28
 
 ### Added

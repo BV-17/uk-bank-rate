@@ -43,6 +43,7 @@ describe('getBankRate', () => {
       effectiveFrom: '2025-12-18',
       observedTo: '2026-09-25',
       pendingDecision: null,
+      beyondSchedule: false,
       asOf: '2026-09-28',
       nextDecision: '2026-11-05',
     });
@@ -74,5 +75,12 @@ describe('getBankRate', () => {
     const current = await getBankRate({ fetch, now: new Date('2026-09-28T09:00:00Z') });
     expect(current.observedTo).toBe(bundledHistory.observedTo);
     expect(requests).toHaveLength(1);
+  });
+
+  it('refuses to invent a rate when nothing is known for today', async () => {
+    const future: BankRateHistory = { changes: [{ date: '2030-01-02', rate: 2 }], observedTo: '2030-01-03' };
+    const { fetch, requests } = serving('DATE,IUDBEDR\n');
+    await expect(getBankRate({ history: future, fetch, now: new Date('2026-09-28T09:00:00Z') })).rejects.toThrow(RangeError);
+    expect(requests).toHaveLength(0);
   });
 });

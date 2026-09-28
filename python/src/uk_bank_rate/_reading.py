@@ -40,4 +40,5 @@ def rate_on(
         effective_from=in_force.date,
         observed_to=history.observed_to,
         pending_decision=_pending_decision_by(history, day, moment),
+        beyond_schedule=day > history.observed_to and (not SCHEDULED_DECISIONS or day > SCHEDULED_DECISIONS[-1]),
     )

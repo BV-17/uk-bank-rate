@@ -2,6 +2,7 @@
 
 from uk_bank_rate._bundled import bundled_history
 from uk_bank_rate._current import fetch_bank_rate_history, get_bank_rate
+from uk_bank_rate._generated import SERIES_CODE, SERIES_STARTS_ON
 from uk_bank_rate._history import extend_history, history_from_observations
 from uk_bank_rate._parse import date_from_series_date, parse_bank_rate_csv
 from uk_bank_rate._reading import rate_on
@@ -12,14 +13,7 @@ from uk_bank_rate._schedule import (
     london_date,
     next_scheduled_decision,
 )
-from uk_bank_rate._source import (
-    SERIES_CODE,
-    SERIES_STARTS_ON,
-    BankRateSourceError,
-    fetch_bank_rate_observations,
-    series_url,
-    urllib_transport,
-)
+from uk_bank_rate._source import BankRateSourceError, fetch_bank_rate_observations, series_url, urllib_transport
 from uk_bank_rate._types import (
     BankRateChange,
     BankRateHistory,

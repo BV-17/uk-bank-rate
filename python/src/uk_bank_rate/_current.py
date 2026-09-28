@@ -9,7 +9,8 @@ from uk_bank_rate._dates import as_aware
 from uk_bank_rate._history import extend_history
 from uk_bank_rate._reading import rate_on
 from uk_bank_rate._schedule import london_date, next_scheduled_decision
-from uk_bank_rate._source import DEFAULT_TIMEOUT_SECONDS, SERIES_STARTS_ON, fetch_bank_rate_observations
+from uk_bank_rate._generated import SERIES_STARTS_ON
+from uk_bank_rate._source import DEFAULT_TIMEOUT_SECONDS, fetch_bank_rate_observations
 from uk_bank_rate._types import BankRateHistory, CurrentBankRate, Transport
 
 # ─── Constants ───────────────────────────────────────────────────────────────
@@ -53,6 +54,7 @@ def get_bank_rate(
         effective_from=reading.effective_from,
         observed_to=reading.observed_to,
         pending_decision=reading.pending_decision,
+        beyond_schedule=reading.beyond_schedule,
         as_of=as_of,
         next_decision=next_scheduled_decision(moment),
     )

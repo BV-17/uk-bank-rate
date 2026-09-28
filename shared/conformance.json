@@ -95,14 +95,14 @@
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
       "date": "2025-12-01",
       "now": "2026-09-28T09:00:00Z",
-      "expected": { "rate": "4", "effectiveFrom": "2025-08-07", "observedTo": "2026-09-16", "pendingDecision": null }
+      "expected": { "rate": "4", "effectiveFrom": "2025-08-07", "observedTo": "2026-09-16", "pendingDecision": null, "beyondSchedule": false }
     },
     {
       "name": "a change applies from its own day",
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
       "date": "2025-12-18",
       "now": "2026-09-28T09:00:00Z",
-      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": null }
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": null, "beyondSchedule": false }
     },
     {
       "name": "nothing is known before the first change",
@@ -116,35 +116,42 @@
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
       "date": "2026-09-17",
       "now": "2026-09-17T12:40:00Z",
-      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": { "date": "2026-09-17", "announced": true } }
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": { "date": "2026-09-17", "announced": true }, "beyondSchedule": false }
     },
     {
       "name": "before noon the day's decision is flagged as not yet announced",
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
       "date": "2026-09-17",
       "now": "2026-09-17T10:12:03Z",
-      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": { "date": "2026-09-17", "announced": false } }
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": { "date": "2026-09-17", "announced": false }, "beyondSchedule": false }
     },
     {
       "name": "a series row for the decision day read before noon is not trusted",
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-17" },
       "date": "2026-09-17",
       "now": "2026-09-17T10:30:00Z",
-      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-17", "pendingDecision": { "date": "2026-09-17", "announced": false } }
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-17", "pendingDecision": { "date": "2026-09-17", "announced": false }, "beyondSchedule": false }
     },
     {
       "name": "the flag clears once the series carries the decision day",
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-18" },
       "date": "2026-09-18",
       "now": "2026-09-18T08:00:00Z",
-      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-18", "pendingDecision": null }
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-18", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "a date past both the series and the published schedule is flagged as beyond it, even with nothing pending",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2027-12-20" },
+      "date": "2028-03-01",
+      "now": "2028-03-02T09:00:00Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2027-12-20", "pendingDecision": null, "beyondSchedule": true }
     },
     {
       "name": "a later date names the first scheduled decision the series does not yet cover",
       "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
       "date": "2026-12-31",
       "now": "2026-09-28T09:00:00Z",
-      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-25", "pendingDecision": { "date": "2026-11-05", "announced": false } }
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-25", "pendingDecision": { "date": "2026-11-05", "announced": false }, "beyondSchedule": false }
     }
   ]
 }

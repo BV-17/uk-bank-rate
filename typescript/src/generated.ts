@@ -2,6 +2,16 @@
 
 import type { BankRateHistory } from './types.js';
 
+// ─── Source ─────────────────────────────────────────────────────────────────
+
+export const SERIES_ENDPOINT = 'https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp';
+
+export const SERIES_CODE = 'IUDBEDR';
+
+export const SERIES_STARTS_ON = '1975-01-02';
+
+export const USER_AGENT = 'uk-bank-rate (+https://github.com/BV-17/uk-bank-rate)';
+
 // ─── Scheduled Decisions ────────────────────────────────────────────────────
 
 export const SCHEDULED_DECISIONS: readonly string[] = [

@@ -27,5 +27,6 @@ export const rateOn = (history: BankRateHistory, date: string, now: Date = new D
     effectiveFrom: inForce.date,
     observedTo: history.observedTo,
     pendingDecision: pendingDecisionBy(history, date, now),
+    beyondSchedule: date > history.observedTo && date > (SCHEDULED_DECISIONS.at(-1) ?? ''),
   };
 };

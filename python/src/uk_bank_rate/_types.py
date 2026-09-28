@@ -36,6 +36,7 @@ class BankRateReading:
     effective_from: datetime.date
     observed_to: datetime.date
     pending_decision: PendingDecision | None
+    beyond_schedule: bool
 
 @dataclass(frozen=True, slots=True)
 class CurrentBankRate(BankRateReading):

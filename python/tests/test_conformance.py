@@ -103,3 +103,4 @@ def test_readings(case: dict[str, Any]) -> None:
     pending = expected["pendingDecision"]
     expected_pending = None if pending is None else PendingDecision(date=_day(pending["date"]), announced=pending["announced"])
     assert reading.pending_decision == expected_pending
+    assert reading.beyond_schedule is expected["beyondSchedule"]

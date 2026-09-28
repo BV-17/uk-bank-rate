@@ -115,6 +115,7 @@ def test_a_bad_answer_is_refused(status: int, body: str, failure: str, wording: 
         (urllib.error.URLError(TimeoutError("timed out")), "timeout"),
         (urllib.error.URLError("connection refused"), "network"),
         (ConnectionResetError("reset by peer"), "network"),
+        (RuntimeError("a custom transport's own error"), "network"),
     ],
 )
 def test_a_failed_connection_names_its_failure(error: BaseException, failure: str) -> None:

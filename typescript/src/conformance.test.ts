@@ -29,6 +29,7 @@ interface ReadingShape {
   effectiveFrom: string;
   observedTo: string;
   pendingDecision: { date: string; announced: boolean } | null;
+  beyondSchedule: boolean;
 }
 
 interface NamedCase {

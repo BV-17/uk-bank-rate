@@ -1,21 +1,14 @@
 // ─── Local Application Imports ──────────────────────────────────────────────
 
 import { assertIsoDate } from './dates.js';
+import { SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT } from './generated.js';
 import { parseBankRateCsv } from './parse.js';
 
 import type { BankRateObservation, FetchOptions, SourceFailure } from './types.js';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const SERIES_ENDPOINT = 'https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp';
-
-export const SERIES_CODE = 'IUDBEDR';
-
-export const SERIES_STARTS_ON = '1975-01-02';
-
 const DEFAULT_TIMEOUT_MS = 15_000;
-
-const USER_AGENT = 'uk-bank-rate (+https://github.com/BV-17/uk-bank-rate)';
 
 const MONTH_ABBREVIATIONS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
@@ -63,7 +56,7 @@ export const seriesUrl = (start: string, end: string): string => {
 // ─── Response ───────────────────────────────────────────────────────────────
 
 const statusExplanation = (status: number): string => {
-  if (status >= 300 && status < 400) return ', redirecting to its error page';
+  if (status === 0 || (status >= 300 && status < 400)) return ', redirecting to its error page';
   if (status === 403) return ', its firewall refusing the request';
   return '';
 };

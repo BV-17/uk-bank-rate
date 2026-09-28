@@ -13,7 +13,7 @@ current = get_bank_rate()
 covid_low = rate_on(bundled_history, "2020-03-15")
 ```
 
-`get_bank_rate()` returns the rate today, the day it took effect, the last day the published series covers, the next scheduled decision, and a `pending_decision` that is set whenever a decision has been announced, or is due, that the published data does not reflect yet. The Committee announces at 12:00 London time and the series can lag by a working day or two, so a client that reads only the latest row reports the old rate for that whole window without knowing it.
+`get_bank_rate()` returns the rate today, the day it took effect, the last day the published series covers, the next scheduled decision, and a `pending_decision` that is set whenever a decision has been announced, or is due, that the published data does not reflect yet, and a `beyond_schedule` flag for dates past both the data and the published schedule. The Committee announces at 12:00 London time and the series can lag by a working day or two, so a client that reads only the latest row reports the old rate for that whole window without knowing it.
 
 `rate_on()` answers the rate on any date since 2 January 1975 from a bundled history of every change, with no network call. Dates come back as `datetime.date` and rates as `Decimal`, so interest worked out from them does not drift. Every failure to reach the Bank raises `BankRateSourceError` with a `failure` of `http`, `not_csv`, `empty`, `timeout` or `network`.
 

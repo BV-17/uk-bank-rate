@@ -82,6 +82,15 @@ def test_the_bundled_history_is_the_starting_point_when_none_is_given() -> None:
     assert current.observed_to == bundled_history.observed_to
     assert len(serving.requests) == 1
 
+def test_no_rate_is_invented_when_nothing_is_known_for_today() -> None:
+    future = BankRateHistory(
+        changes=(BankRateChange(date=datetime.date(2030, 1, 2), rate=Decimal("2")),), observed_to=datetime.date(2030, 1, 3),
+    )
+    serving = _Serving("DATE,IUDBEDR\n")
+    with pytest.raises(LookupError):
+        get_bank_rate(history=future, transport=serving, now=_at("2026-09-28T09:00:00Z"))
+    assert serving.requests == []
+
 def test_a_naive_now_is_refused_rather_than_guessed() -> None:
     with pytest.raises(ValueError, match="timezone-aware"):
         get_bank_rate(transport=_Serving("DATE,IUDBEDR\n"), now=datetime.datetime(2026, 9, 28, 9, 0))

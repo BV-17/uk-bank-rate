@@ -28,7 +28,9 @@ Anyone who keeps writing the same fetch against the Bank of England Database: pe
 
 The Committee announces its decision at 12:00 London time, and Bank Rate changes that day. The published series does not. The Bank's own help page says a series can publish one to two working days after the date it covers, and on the afternoon of 17 September 2026 the series still ended on the 16th. A client that simply reads the latest row reports the old rate for that whole window, with nothing to say it might be wrong.
 
-So every reading carries a `pendingDecision`. When it is set, a scheduled decision falls on or before the date you asked about and the published data does not reflect it yet. `announced: true` means the Bank has spoken and the data has not caught up, so the rate you are holding may already be out of date; `announced: false` means the decision is still to come, later today or on a future date. When it is `null`, the answer is settled.
+So every reading carries a `pendingDecision`. When it is set, a scheduled decision falls on or before the date you asked about and the published data does not reflect it yet. `announced: true` means the Bank has spoken and the data has not caught up, so the rate you are holding may already be out of date; `announced: false` means the decision is still to come, later today or on a future date. When it is `null`, no scheduled decision stands in the way.
+
+The schedule itself runs out, though: the Bank publishes it a year or so ahead. So every reading also carries `beyondSchedule`, which is `true` when the date you asked about lies past both the published data and the last scheduled decision. Decisions nobody has scheduled yet may have moved the rate by then, so treat such an answer as the last known rate, not a settled one.
 
 ## TypeScript
 
@@ -54,6 +56,7 @@ console.log(covidLow?.rate, covidLow?.effectiveFrom);
   effectiveFrom: '2025-12-18',
   observedTo: '2026-09-25',
   pendingDecision: null,
+  beyondSchedule: false,
   asOf: '2026-09-28',
   nextDecision: '2026-11-05',
 }
@@ -108,7 +111,7 @@ const offline = rateOn(bundledHistory, londonDate());
 ## The data
 
 - **Source**: the Bank of England Database, series `IUDBEDR` (Official Bank Rate), daily from 2 January 1975, through the CSV download the Bank documents on its help page for automatic use.
-- **Bundled history**: every change since 1975 ships inside both packages and is refreshed at each release, so a live call fetches days, not fifty years.
+- **Bundled history**: every change since 1975 ships inside both packages and is refreshed at each release, so a live call fetches days, not fifty years. Its first entry, 11.5% on 2 January 1975, is where the series begins rather than a change, so a reading from early 1975 gives that date as `effectiveFrom` although the rate was already in force.
 - **Schedule**: the Committee's decision dates for 2026 and 2027, from the Bank's published dates, added a year at a time as the Bank announces them.
 - **Two details learnt the hard way**: the Bank's firewall answers Python's default `urllib` user agent with `403 Access Denied`, so both packages send their own; and a start date before 1975 draws a redirect to an error page that still claims to be CSV, so both packages judge an answer by its status and its body, never by its headers.
 
@@ -132,6 +135,7 @@ uk-bank-rate/
 ├── shared/
 │   ├── bank-rate-changes.json     # every change since 1975, refreshed from the Bank
 │   ├── scheduled-decisions.json   # the Committee's published decision dates
+│   ├── source.json                # the endpoint, series code, start date and user agent
 │   └── conformance.json           # test cases both packages must pass
 ├── scripts/
 │   ├── refresh-snapshot.mjs       # fetches the full series into shared/
@@ -143,7 +147,7 @@ uk-bank-rate/
 | Where | Command | What it does |
 |---|---|---|
 | root | `npm run sync` | Writes `shared/` into both packages' generated modules |
-| root | `npm run sync:check` | Fails if a generated module, licence copy or version has drifted from `shared/` |
+| root | `npm run sync:check` | Fails if a generated module or licence copy has drifted from `shared/`, or any version disagrees |
 | root | `npm run snapshot` | Refreshes the bundled history from the Bank, then syncs |
 | `typescript/` | `npm test`, `npm run typecheck`, `npm run build` | The TypeScript suite, strict typecheck and build |
 | `python/` | `python -m pytest` | The Python suite |

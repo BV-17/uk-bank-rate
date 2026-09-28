@@ -4,8 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 // ─── Local Application Imports ──────────────────────────────────────────────
 
-import { SCHEDULED_DECISIONS, bundledHistory } from './generated.js';
-import { SERIES_STARTS_ON } from './source.js';
+import { SCHEDULED_DECISIONS, SERIES_STARTS_ON, bundledHistory } from './generated.js';
 
 // ─── Bundled History ────────────────────────────────────────────────────────
 

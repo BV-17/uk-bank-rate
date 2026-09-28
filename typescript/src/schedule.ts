@@ -1,5 +1,6 @@
 // ─── Local Application Imports ──────────────────────────────────────────────
 
+import { assertIsoDate } from './dates.js';
 import { SCHEDULED_DECISIONS } from './generated.js';
 
 // ─── London Clock ───────────────────────────────────────────────────────────
@@ -35,12 +36,15 @@ export const londonDate = (now: Date = new Date()): string => readLondonClock(no
 // ─── Announcements ──────────────────────────────────────────────────────────
 
 export const isDecisionAnnounced = (decisionDate: string, now: Date = new Date()): boolean => {
+  assertIsoDate(decisionDate, 'decisionDate');
   const { date, minuteOfDay } = readLondonClock(now);
   return date > decisionDate || (date === decisionDate && minuteOfDay >= ANNOUNCEMENT_MINUTE_OF_DAY);
 };
 
-export const isDecisionReflected = (decisionDate: string, observedTo: string, now: Date = new Date()): boolean =>
-  observedTo >= decisionDate && isDecisionAnnounced(decisionDate, now);
+export const isDecisionReflected = (decisionDate: string, observedTo: string, now: Date = new Date()): boolean => {
+  assertIsoDate(observedTo, 'observedTo');
+  return observedTo >= decisionDate && isDecisionAnnounced(decisionDate, now);
+};
 
 export const nextScheduledDecision = (now: Date = new Date()): string | null =>
   SCHEDULED_DECISIONS.find((decisionDate) => !isDecisionAnnounced(decisionDate, now)) ?? null;

@@ -27,6 +27,7 @@ export interface BankRateReading {
   effectiveFrom: string;
   observedTo: string;
   pendingDecision: PendingDecision | null;
+  beyondSchedule: boolean;
 }
 
 export interface CurrentBankRate extends BankRateReading {

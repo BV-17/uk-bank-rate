@@ -67,6 +67,11 @@ describe('fetchBankRateObservations', () => {
     });
   });
 
+  it('reads the status 0 of an opaque redirect as a redirect', async () => {
+    const opaque: typeof globalThis.fetch = async () => Object.defineProperty(new Response(''), 'status', { value: 0 });
+    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch: opaque })).rejects.toThrow(/error page/);
+  });
+
   it('names the firewall when it refuses the request', async () => {
     const fetch = answering('<TITLE>Access Denied</TITLE>', 403);
     await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toThrow(/firewall/);

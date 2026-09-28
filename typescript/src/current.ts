@@ -1,11 +1,11 @@
 // ─── Local Application Imports ──────────────────────────────────────────────
 
 import { shiftIsoDate } from './dates.js';
-import { bundledHistory } from './generated.js';
+import { SERIES_STARTS_ON, bundledHistory } from './generated.js';
 import { extendHistory } from './history.js';
 import { rateOn } from './reading.js';
 import { londonDate, nextScheduledDecision } from './schedule.js';
-import { SERIES_STARTS_ON, fetchBankRateObservations } from './source.js';
+import { fetchBankRateObservations } from './source.js';
 
 import type { BankRateHistory, CurrentBankRate, CurrentBankRateOptions } from './types.js';
 
