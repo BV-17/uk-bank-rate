@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "uk-bank-rate"
+dynamic = ["version"]
+description = "The UK Bank Rate from the Bank of England Database, with the MPC schedule and honest handling of the hours after a decision."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Bhupen Varsani" }]
+keywords = ["bank rate", "base rate", "bank of england", "interest rate", "monetary policy", "mpc", "uk"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Financial and Insurance Industry",
+  "Operating System :: OS Independent",
+  "Private :: Do Not Upload",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Office/Business :: Financial",
+  "Typing :: Typed",
+]
+dependencies = ["tzdata; sys_platform == 'win32'"]
+
+[project.urls]
+Homepage = "https://github.com/BV-17/uk-bank-rate"
+Issues = "https://github.com/BV-17/uk-bank-rate/issues"
+Changelog = "https://github.com/BV-17/uk-bank-rate/blob/main/CHANGELOG.md"
+
+[tool.hatch.version]
+path = "src/uk_bank_rate/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/uk_bank_rate"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/uk_bank_rate", "README.md", "LICENSE", "pyproject.toml"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

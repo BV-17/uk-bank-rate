@@ -1,0 +1,10 @@
+{
+  "name": "uk-bank-rate-repository",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync-shared.mjs",
+    "sync:check": "node scripts/sync-shared.mjs --check",
+    "snapshot": "npm --prefix typescript run build && node scripts/refresh-snapshot.mjs && npm run sync && npm --prefix typescript run build"
+  }
+}

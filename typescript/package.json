@@ -1,0 +1,54 @@
+{
+  "name": "uk-bank-rate",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The UK Bank Rate from the Bank of England Database, with the MPC schedule and honest handling of the hours after a decision.",
+  "keywords": [
+    "bank rate",
+    "base rate",
+    "bank of england",
+    "interest rate",
+    "monetary policy",
+    "mpc",
+    "uk"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "Bhupen Varsani",
+    "url": "https://github.com/BV-17"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BV-17/uk-bank-rate.git"
+  },
+  "homepage": "https://github.com/BV-17/uk-bank-rate#readme",
+  "bugs": "https://github.com/BV-17/uk-bank-rate/issues",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "sideEffects": false,
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:live": "LIVE=1 vitest run src/live.test.ts",
+    "prepublishOnly": "npm run typecheck && npm test && npm run build"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.3",
+    "typescript": "7.0.2",
+    "vitest": "5.0.2"
+  }
+}

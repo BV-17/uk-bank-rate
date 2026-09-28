@@ -1,0 +1,150 @@
+{
+  "seriesDates": [
+    { "input": "18 Dec 2025", "expected": "2025-12-18" },
+    { "input": "02 Jan 1975", "expected": "1975-01-02" },
+    { "input": "5-aug-2026", "expected": "2026-08-05" },
+    { "input": "07 SEP 2026", "expected": "2026-09-07" },
+    { "input": "04 Aug 23", "expected": "2023-08-04" },
+    { "input": "04 Aug 95", "expected": "1995-08-04" },
+    { "input": "29 Feb 2024", "expected": "2024-02-29" },
+    { "input": "29 Feb 2025", "expected": null },
+    { "input": "31 Feb 2026", "expected": null },
+    { "input": "DATE", "expected": null },
+    { "input": "5 Smarch 2026", "expected": null },
+    { "input": "2026-08-05", "expected": null }
+  ],
+  "csv": [
+    {
+      "name": "rows come back as ISO dates and rates, oldest first",
+      "input": "DATE,IUDBEDR\n18 Dec 2025,3.75\n17 Dec 2025,4\n25 Sep 2026,3.75\n",
+      "expected": [["2025-12-17", "4"], ["2025-12-18", "3.75"], ["2026-09-25", "3.75"]]
+    },
+    {
+      "name": "tab separators, Windows line endings and a byte order mark are read",
+      "input": "﻿DATE\tIUDBEDR\r\n18 Dec 2025\t3.75\r\n",
+      "expected": [["2025-12-18", "3.75"]]
+    },
+    {
+      "name": "the older fractional rates keep their precision",
+      "input": "DATE,IUDBEDR\n03 Mar 1980,9.8125\n",
+      "expected": [["1980-03-03", "9.8125"]]
+    },
+    {
+      "name": "rows without a readable date or rate are skipped",
+      "input": "DATE,IUDBEDR\n01 Jan 2026,\n05 Feb 2026,n/a\n5 Smarch 2026,4\n19 Mar 2026,3.75\n",
+      "expected": [["2026-03-19", "3.75"]]
+    },
+    { "name": "a header alone yields nothing", "input": "DATE,IUDBEDR", "expected": [] },
+    { "name": "a blank body yields nothing", "input": "   ", "expected": [] }
+  ],
+  "historyFromObservations": [
+    {
+      "name": "only the days the rate changed are kept, with the last day observed",
+      "observations": [["2026-03-18", "4"], ["2026-03-19", "3.75"], ["2026-03-17", "4"], ["2026-03-20", "3.75"]],
+      "expected": { "changes": [["2026-03-17", "4"], ["2026-03-19", "3.75"]], "observedTo": "2026-03-20" }
+    },
+    { "name": "no observations yield no history", "observations": [], "expected": null }
+  ],
+  "extendHistory": [
+    {
+      "name": "days the history already covers are ignored",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-18" },
+      "observations": [["2026-09-17", "9"]],
+      "expected": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-18" }
+    },
+    {
+      "name": "a held rate moves the observed date on without adding a change",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-18" },
+      "observations": [["2026-09-21", "3.75"], ["2026-09-22", "3.75"]],
+      "expected": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-22" }
+    },
+    {
+      "name": "a new rate adds a change on the first day it appears",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-18" },
+      "observations": [["2026-11-06", "3.5"], ["2026-11-05", "3.5"], ["2026-11-04", "3.75"]],
+      "expected": { "changes": [["2025-12-18", "3.75"], ["2026-11-05", "3.5"]], "observedTo": "2026-11-06" }
+    }
+  ],
+  "londonDates": [
+    { "name": "summer runs an hour ahead of UTC", "now": "2026-09-16T23:30:00Z", "expected": "2026-09-17" },
+    { "name": "winter keeps UTC", "now": "2026-11-05T23:30:00Z", "expected": "2026-11-05" },
+    { "name": "the minute before the clocks go forward is still winter", "now": "2026-03-29T00:59:00Z", "expected": "2026-03-29" },
+    { "name": "the night the clocks go back is still summer until 01:00 UTC", "now": "2026-10-24T23:30:00Z", "expected": "2026-10-25" }
+  ],
+  "announcements": [
+    { "name": "noon in London is 11:00 UTC in summer, a minute before", "decision": "2026-09-17", "now": "2026-09-17T10:59:00Z", "expected": false },
+    { "name": "noon in London is 11:00 UTC in summer, on the minute", "decision": "2026-09-17", "now": "2026-09-17T11:00:00Z", "expected": true },
+    { "name": "noon in London is 12:00 UTC in winter, a minute before", "decision": "2026-11-05", "now": "2026-11-05T11:59:00Z", "expected": false },
+    { "name": "noon in London is 12:00 UTC in winter, on the minute", "decision": "2026-11-05", "now": "2026-11-05T12:00:00Z", "expected": true },
+    { "name": "half past midnight in London before the day is not the day", "decision": "2026-09-17", "now": "2026-09-16T23:30:00Z", "expected": false },
+    { "name": "late on the day itself counts as announced", "decision": "2026-09-17", "now": "2026-09-17T23:30:00Z", "expected": true }
+  ],
+  "reflections": [
+    { "name": "announced, but the series still ends the day before", "decision": "2026-09-17", "observedTo": "2026-09-16", "now": "2026-09-17T12:40:00Z", "expected": false },
+    { "name": "a row for the day, read before the announcement", "decision": "2026-09-17", "observedTo": "2026-09-17", "now": "2026-09-17T10:30:00Z", "expected": false },
+    { "name": "a row for the day, read after the announcement", "decision": "2026-09-17", "observedTo": "2026-09-17", "now": "2026-09-18T08:00:00Z", "expected": true }
+  ],
+  "nextDecisions": [
+    { "name": "a decision day is next until noon", "now": "2026-09-17T10:59:00Z", "expected": "2026-09-17" },
+    { "name": "after noon the next meeting is next", "now": "2026-09-17T11:00:00Z", "expected": "2026-11-05" },
+    { "name": "nothing is next once the published schedule has run out", "now": "2099-01-01T09:00:00Z", "expected": null }
+  ],
+  "readings": [
+    {
+      "name": "a past date reads the rate in force and the day it took effect",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
+      "date": "2025-12-01",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "4", "effectiveFrom": "2025-08-07", "observedTo": "2026-09-16", "pendingDecision": null }
+    },
+    {
+      "name": "a change applies from its own day",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
+      "date": "2025-12-18",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": null }
+    },
+    {
+      "name": "nothing is known before the first change",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
+      "date": "2025-08-06",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": null
+    },
+    {
+      "name": "a decision announced this afternoon but missing from the series is flagged, as at 13:40 on 17 September 2026",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
+      "date": "2026-09-17",
+      "now": "2026-09-17T12:40:00Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": { "date": "2026-09-17", "announced": true } }
+    },
+    {
+      "name": "before noon the day's decision is flagged as not yet announced",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-16" },
+      "date": "2026-09-17",
+      "now": "2026-09-17T10:12:03Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-16", "pendingDecision": { "date": "2026-09-17", "announced": false } }
+    },
+    {
+      "name": "a series row for the decision day read before noon is not trusted",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-17" },
+      "date": "2026-09-17",
+      "now": "2026-09-17T10:30:00Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-17", "pendingDecision": { "date": "2026-09-17", "announced": false } }
+    },
+    {
+      "name": "the flag clears once the series carries the decision day",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-18" },
+      "date": "2026-09-18",
+      "now": "2026-09-18T08:00:00Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-18", "pendingDecision": null }
+    },
+    {
+      "name": "a later date names the first scheduled decision the series does not yet cover",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "date": "2026-12-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-25", "pendingDecision": { "date": "2026-11-05", "announced": false } }
+    }
+  ]
+}

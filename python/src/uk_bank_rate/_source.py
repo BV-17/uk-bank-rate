@@ -1,0 +1,119 @@
+# ─── Python Standard Library ─────────────────────────────────────────────────
+
+import datetime
+import urllib.error
+import urllib.parse
+import urllib.request
+from email.message import Message
+from typing import IO
+
+# ─── Local Application Imports ───────────────────────────────────────────────
+
+from uk_bank_rate._dates import as_date
+from uk_bank_rate._parse import parse_bank_rate_csv
+from uk_bank_rate._types import BankRateObservation, SourceFailure, Transport
+
+# ─── Constants ───────────────────────────────────────────────────────────────
+
+SERIES_ENDPOINT = "https://www.bankofengland.co.uk/boeapps/database/_iadb-fromshowcolumns.asp"
+
+SERIES_CODE = "IUDBEDR"
+
+SERIES_STARTS_ON = datetime.date(1975, 1, 2)
+
+DEFAULT_TIMEOUT_SECONDS = 15.0
+
+USER_AGENT = "uk-bank-rate (+https://github.com/BV-17/uk-bank-rate)"
+
+MONTH_ABBREVIATIONS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
+
+# ─── Errors ──────────────────────────────────────────────────────────────────
+
+class BankRateSourceError(Exception):
+    def __init__(self, failure: SourceFailure, message: str, status: int | None = None) -> None:
+        super().__init__(message)
+        self.failure: SourceFailure = failure
+        self.status = status
+
+# ─── Request ─────────────────────────────────────────────────────────────────
+
+def _series_date_parameter(day: datetime.date) -> str:
+    return f"{day.day:02d}/{MONTH_ABBREVIATIONS[day.month - 1]}/{day.year}"
+
+def series_url(start: datetime.date | str, end: datetime.date | str) -> str:
+    first_day = max(as_date(start, "start"), SERIES_STARTS_ON)
+    last_day = as_date(end, "end")
+    if last_day < first_day:
+        raise ValueError(f"end ({last_day}) falls before start ({first_day})")
+    parameters = {
+        "csv.x": "yes",
+        "Datefrom": _series_date_parameter(first_day),
+        "Dateto": _series_date_parameter(last_day),
+        "SeriesCodes": SERIES_CODE,
+        "CSVF": "TN",
+        "UsingCodes": "Y",
+        "VPD": "Y",
+        "VFD": "N",
+    }
+    return f"{SERIES_ENDPOINT}?{urllib.parse.urlencode(parameters)}"
+
+# ─── Transport ───────────────────────────────────────────────────────────────
+
+class _RefuseRedirects(urllib.request.HTTPRedirectHandler):
+    def redirect_request(
+        self, req: urllib.request.Request, fp: IO[bytes], code: int, msg: str, headers: Message, newurl: str,
+    ) -> urllib.request.Request | None:
+        return None
+
+def urllib_transport(url: str, timeout: float) -> tuple[int, str]:
+    opener = urllib.request.build_opener(_RefuseRedirects)
+    request = urllib.request.Request(url, headers={"Accept": "text/csv, application/csv", "User-Agent": USER_AGENT})
+    try:
+        with opener.open(request, timeout=timeout) as response:
+            return response.status, response.read().decode("utf-8", errors="replace")
+    except urllib.error.HTTPError as error:
+        with error:
+            return error.code, error.read().decode("utf-8", errors="replace")
+
+# ─── Response ────────────────────────────────────────────────────────────────
+
+def _status_explanation(status: int) -> str:
+    if 300 <= status < 400:
+        return ", redirecting to its error page"
+    if status == 403:
+        return ", its firewall refusing the request"
+    return ""
+
+def _read_series_body(status: int, body: str) -> list[BankRateObservation]:
+    if status != 200:
+        message = f"The Bank of England Database answered HTTP {status}{_status_explanation(status)}"
+        raise BankRateSourceError("http", message, status)
+    if not body.strip():
+        raise BankRateSourceError("empty", "The Bank of England Database returned an empty response", status)
+    if body.lstrip().startswith("<"):
+        raise BankRateSourceError("not_csv", "The Bank of England Database returned a web page instead of CSV", status)
+    return parse_bank_rate_csv(body)
+
+# ─── Fetch ───────────────────────────────────────────────────────────────────
+
+def fetch_bank_rate_observations(
+    start: datetime.date | str,
+    end: datetime.date | str,
+    *,
+    timeout: float = DEFAULT_TIMEOUT_SECONDS,
+    transport: Transport | None = None,
+) -> list[BankRateObservation]:
+    url = series_url(start, end)
+    send = transport or urllib_transport
+    timed_out = f"The Bank of England Database did not answer within {timeout:g} seconds"
+    try:
+        status, body = send(url, timeout)
+    except TimeoutError as error:
+        raise BankRateSourceError("timeout", timed_out) from error
+    except urllib.error.URLError as error:
+        if isinstance(error.reason, TimeoutError):
+            raise BankRateSourceError("timeout", timed_out) from error
+        raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {error.reason}") from error
+    except OSError as error:
+        raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {error}") from error
+    return _read_series_body(status, body)

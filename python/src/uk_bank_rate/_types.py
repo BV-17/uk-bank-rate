@@ -1,0 +1,49 @@
+# ─── Python Standard Library ─────────────────────────────────────────────────
+
+import datetime
+from collections.abc import Callable
+from dataclasses import dataclass
+from decimal import Decimal
+from typing import Literal
+
+# ─── Series ──────────────────────────────────────────────────────────────────
+
+@dataclass(frozen=True, slots=True)
+class BankRateObservation:
+    date: datetime.date
+    rate: Decimal
+
+@dataclass(frozen=True, slots=True)
+class BankRateChange:
+    date: datetime.date
+    rate: Decimal
+
+@dataclass(frozen=True, slots=True)
+class BankRateHistory:
+    changes: tuple[BankRateChange, ...]
+    observed_to: datetime.date
+
+# ─── Readings ────────────────────────────────────────────────────────────────
+
+@dataclass(frozen=True, slots=True)
+class PendingDecision:
+    date: datetime.date
+    announced: bool
+
+@dataclass(frozen=True, slots=True)
+class BankRateReading:
+    rate: Decimal
+    effective_from: datetime.date
+    observed_to: datetime.date
+    pending_decision: PendingDecision | None
+
+@dataclass(frozen=True, slots=True)
+class CurrentBankRate(BankRateReading):
+    as_of: datetime.date
+    next_decision: datetime.date | None
+
+# ─── Fetching ────────────────────────────────────────────────────────────────
+
+SourceFailure = Literal["http", "not_csv", "empty", "timeout", "network"]
+
+Transport = Callable[[str, float], tuple[int, str]]
