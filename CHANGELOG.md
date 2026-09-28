@@ -4,6 +4,8 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-28
+
 ### Added
 
 - `beyondSchedule` on every reading, set when the date asked about lies past both the published data and the last scheduled decision, so an answer the package cannot vouch for is no longer presented as settled

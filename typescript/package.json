@@ -1,6 +1,6 @@
 {
   "name": "uk-bank-rate",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "The UK Bank Rate from the Bank of England Database, with the MPC schedule and honest handling of the hours after a decision.",
   "keywords": [
