@@ -1,6 +1,6 @@
 # CLAUDE.md - uk-bank-rate
 
-Two open-source packages, one for npm and one for PyPI, that read the UK Bank Rate from the Bank of England Database and answer identically. This is a **public-bound repository**: nothing private belongs in a tracked file. No local paths, no names of other projects, clients or people, no credentials, and no example that came from real data other than the Bank's own published series.
+Two open-source packages, one for npm and one for PyPI, that read the UK Bank Rate from the Bank of England Database and answer identically. This is a **public repository**, and the Python package is on PyPI: nothing private belongs in a tracked file or a commit message. No local paths, no names of other projects, clients or people, no credentials, and no example that came from real data other than the Bank's own published series.
 
 ## How it is laid out
 
@@ -46,7 +46,7 @@ The two packages mirror each other module for module: `parse`, `source`, `histor
 
 Both packages share one version. A release bumps `typescript/package.json` (and `typescript/package-lock.json`, which holds it twice), `python/src/uk_bank_rate/_version.py`, the Version badge in `README.md`, and moves `CHANGELOG.md`'s `[Unreleased]` into a dated heading; then an annotated tag `vX.Y.Z`. `npm run sync:check` fails if any of them disagree.
 
-**Publishing is a public and permanent act, so it happens only on the maintainer's explicit say.** A published npm or PyPI version can never be reused. Two guards stop an accident until then: `"private": true` in `typescript/package.json` refuses `npm publish`, and the `Private :: Do Not Upload` classifier in `python/pyproject.toml` makes PyPI refuse the upload. Remove each only as part of a deliberate first release.
+**Publishing is a public and permanent act, so it happens only on the maintainer's explicit say.** A published version can never be reused. **PyPI publishes through `.github/workflows/publish.yml`**, a trusted publisher with no token: create a GitHub release from the version tag (`gh release create vX.Y.Z`) and the workflow tests, builds and uploads. It refuses a ref that does not match `_version.py`, and the `pypi` environment accepts only `v*` tags, so nothing on `main` can publish. **npm is not published yet**: `"private": true` in `typescript/package.json` still refuses `npm publish`, and comes out only in the release that first publishes it.
 
 ## Conventions
 

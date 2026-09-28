@@ -17,7 +17,6 @@ classifiers = [
   "Intended Audience :: Developers",
   "Intended Audience :: Financial and Insurance Industry",
   "Operating System :: OS Independent",
-  "Private :: Do Not Upload",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
   "Programming Language :: Python :: 3.11",

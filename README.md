@@ -10,8 +10,8 @@
 ![Vitest](https://img.shields.io/badge/Vitest-5.0-6e9f18?logo=vitest&logoColor=white)
 ![pytest](https://img.shields.io/badge/pytest-tested-0a9edc?logo=pytest&logoColor=white)
 
-![Status](https://img.shields.io/badge/Status-Pre--release-d29922)
-![Version](https://img.shields.io/badge/Version-0.2.0-0a7ea4)
+![Status](https://img.shields.io/badge/Status-Alpha-d29922)
+![Version](https://img.shields.io/badge/Version-0.2.1-0a7ea4)
 ![Changelog](https://img.shields.io/badge/Changelog-Keep_a_Changelog-e05735)
 ![Claude](https://img.shields.io/badge/Claude-AI_Assisted-cc785c?logo=anthropic&logoColor=white)
 ![Licence](https://img.shields.io/badge/Licence-MIT-3da639?logo=opensourceinitiative&logoColor=white)
@@ -37,6 +37,8 @@ The schedule itself runs out, though: the Bank publishes it a year or so ahead. 
 ```bash
 npm install uk-bank-rate
 ```
+
+The npm release follows the PyPI one. Until it lands, build the package from `typescript/` with `npm ci && npm run build`.
 
 ```ts
 import { bundledHistory, getBankRate, rateOn } from 'uk-bank-rate';

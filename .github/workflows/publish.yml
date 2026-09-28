@@ -1,0 +1,53 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Test and build the Python distributions
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: python
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: The tag matches the package version
+        run: |
+          version=$(grep -E '^VERSION = ' src/uk_bank_rate/_version.py | cut -d'"' -f2)
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "The ref ${GITHUB_REF_NAME} does not match the package version ${version}, so nothing is published"
+            exit 1
+          fi
+      - run: python -m pip install . pytest build
+      - run: python -m pytest -q
+      - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: python-distributions
+          path: python/dist/
+          if-no-files-found: error
+
+  pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/project/uk-bank-rate/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: python-distributions
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@release/v1
