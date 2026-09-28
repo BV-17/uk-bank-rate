@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  build:
+  python-build:
     name: Test and build the Python distributions
     runs-on: ubuntu-latest
     defaults:
@@ -36,9 +36,39 @@ jobs:
           path: python/dist/
           if-no-files-found: error
 
+  npm-build:
+    name: Test and build the npm package
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: typescript
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: The tag matches the package version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "${GITHUB_REF_NAME}" != "v${version}" ]; then
+            echo "The ref ${GITHUB_REF_NAME} does not match the package version ${version}, so nothing is published"
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npm pack
+      - uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: typescript/uk-bank-rate-*.tgz
+          if-no-files-found: error
+
   pypi:
     name: Publish to PyPI
-    needs: build
+    needs: [python-build, npm-build]
     runs-on: ubuntu-latest
     environment:
       name: pypi
@@ -51,3 +81,31 @@ jobs:
           name: python-distributions
           path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
+
+  npm:
+    name: Publish to npm
+    needs: [python-build, npm-build]
+    runs-on: ubuntu-latest
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/uk-bank-rate
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+      - name: Publish unless the registry already holds this version
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          status=$(curl -s -o /dev/null -w '%{http_code}' "https://registry.npmjs.org/uk-bank-rate/${version}")
+          if [ "${status}" = "200" ]; then
+            echo "uk-bank-rate ${version} is already on npm, so nothing is published"
+            exit 0
+          fi
+          npm publish "./uk-bank-rate-${version}.tgz"

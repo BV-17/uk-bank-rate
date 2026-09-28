@@ -1,7 +1,6 @@
 {
   "name": "uk-bank-rate",
-  "version": "0.2.1",
-  "private": true,
+  "version": "0.2.2",
   "description": "The UK Bank Rate from the Bank of England Database, with the MPC schedule and honest handling of the hours after a decision.",
   "keywords": [
     "bank rate",
@@ -19,7 +18,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/BV-17/uk-bank-rate.git"
+    "url": "git+https://github.com/BV-17/uk-bank-rate.git",
+    "directory": "typescript"
   },
   "homepage": "https://github.com/BV-17/uk-bank-rate#readme",
   "bugs": "https://github.com/BV-17/uk-bank-rate/issues",

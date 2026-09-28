@@ -4,6 +4,14 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-09-28
+
+### Changed
+
+- The TypeScript package is published on npm as `uk-bank-rate`. This first npm version was uploaded by hand, since npm can attach a trusted publisher only to a package that already exists, so it carries no provenance attestation
+- The publishing workflow now publishes to npm as well as PyPI, from the same version tag and by trusted publishing, and publishes neither package unless both have built and passed their tests
+- The code and the bundled data are otherwise unchanged from 0.2.1 in both packages
+
 ## [0.2.1] - 2026-09-28
 
 ### Changed
