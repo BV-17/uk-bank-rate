@@ -87,7 +87,7 @@ print(current.rate, current.effective_from)
 
 pending = current.pending_decision
 if pending and pending.announced:
-    print("Announced today, not yet in the published data")
+    print("Announced, not yet in the published data")
 
 # The Covid low: 0.1, in force from 2020-03-19
 covid_low = rate_on(bundled_history, "2020-06-01")
@@ -164,7 +164,7 @@ Every name below is the TypeScript one first and the Python one second, and the 
 - `getBankRate`, `get_bank_rate`: the rate today, with the day it took effect, the last day observed, any pending decision and the next scheduled one.
 - `rateOn`, `rate_on`: the rate in force on a date, from a history you already hold, with no network call.
 - `ratesBetween`, `rates_between`: the periods over which the rate held between two dates, each with its days, with no network call.
-- `latePaymentRate`, `late_payment_rate`: the rate of statutory interest on a late commercial payment, for the day that interest starts to run, with the reference day and the Bank Rate on it.
+- `latePaymentRate`, `late_payment_rate`: the rate of statutory interest on a late commercial payment, for the day that interest starts to run, with the reference day and the Bank Rate on it, and no network call.
 
 **Histories**
 
