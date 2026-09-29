@@ -110,21 +110,38 @@ The 2025 span runs from 4.75% on 1 January to 3.75% from 18 December, one period
 
 ## What each package offers
 
-| TypeScript | Python | What it does |
-|---|---|---|
-| `getBankRate(options)` | `get_bank_rate(...)` | The rate today, with the day it took effect, the last day observed, any pending decision and the next scheduled one |
-| `rateOn(history, date, now)` | `rate_on(history, on, now)` | The rate in force on a date, from a history you already hold, with no network call |
-| `ratesBetween(history, start, end, now)` | `rates_between(history, start, end, now)` | The periods over which the rate held across a span, each with its days, with no network call |
-| `fetchBankRateHistory(options)` | `fetch_bank_rate_history(...)` | The bundled history, or one you hold, brought up to date by fetching only the days since it ends |
-| `fetchBankRateObservations(start, end, options)` | `fetch_bank_rate_observations(start, end, ...)` | The daily series for a range, straight from the Bank. A range that starts after today has no observations yet, so it is answered without asking |
-| `bundledHistory` | `bundled_history` | Every change since 2 January 1975, as shipped with the release |
-| `historyFromObservations(observations)`, `extendHistory(history, observations)` | `history_from_observations(...)`, `extend_history(...)` | A history built from daily observations, or one extended by newer observations |
-| `SCHEDULED_DECISIONS`, `nextScheduledDecision(now)` | `SCHEDULED_DECISIONS`, `next_scheduled_decision(now)` | The Committee's published decision dates, and the next one |
-| `isDecisionAnnounced(date, now)`, `isDecisionReflected(date, observedTo, now)` | `is_decision_announced(...)`, `is_decision_reflected(...)` | Whether 12:00 London time has passed on a decision day, and whether a series ending on `observedTo` shows the decision |
-| `londonDate(now)` | `london_date(now)` | The date in London, which is the day every answer is judged by |
-| `parseBankRateCsv(csv)`, `isoFromSeriesDate(raw)`, `seriesUrl(start, end)` | `parse_bank_rate_csv(...)`, `date_from_series_date(...)`, `series_url(...)` | The pieces the fetch is built from, for reading the Bank's CSV yourself |
-| `SERIES_CODE`, `SERIES_STARTS_ON`, `USER_AGENT` | `SERIES_CODE`, `SERIES_STARTS_ON`, `USER_AGENT` | The series (`IUDBEDR`), the day it begins, and the user agent both packages send |
-| `BankRateSourceError` | `BankRateSourceError` | Raised with a `failure` of `http`, `not_csv`, `empty`, `timeout` or `network`, and the HTTP `status` where there was one |
+Every name below is the TypeScript one first and the Python one second, and the constants and the error are named the same in both.
+
+**Reading the rate**
+
+- `getBankRate`, `get_bank_rate`: the rate today, with the day it took effect, the last day observed, any pending decision and the next scheduled one.
+- `rateOn`, `rate_on`: the rate in force on a date, from a history you already hold, with no network call.
+- `ratesBetween`, `rates_between`: the periods over which the rate held between two dates, each with its days, with no network call.
+
+**Histories**
+
+- `bundledHistory`, `bundled_history`: every change since 2 January 1975, as shipped with the release.
+- `fetchBankRateHistory`, `fetch_bank_rate_history`: the bundled history, or one you hold, brought up to date by fetching only the days since it ends.
+- `fetchBankRateObservations`, `fetch_bank_rate_observations`: the daily series between two dates, straight from the Bank. A range that starts after today has no observations yet, so it is answered without asking.
+- `historyFromObservations`, `history_from_observations`: a history built from daily observations.
+- `extendHistory`, `extend_history`: a history extended by newer observations.
+
+**The schedule and the clock**
+
+- `SCHEDULED_DECISIONS`: the Committee's published decision dates.
+- `nextScheduledDecision`, `next_scheduled_decision`: the next of them.
+- `isDecisionAnnounced`, `is_decision_announced`: whether 12:00 London time has passed on a decision day.
+- `isDecisionReflected`, `is_decision_reflected`: whether a series ending on a given day shows the decision.
+- `londonDate`, `london_date`: the date in London, which is the day every answer is judged by.
+
+**Lower-level pieces**
+
+- `parseBankRateCsv`, `parse_bank_rate_csv`: the Bank's CSV read into observations, the way the fetch reads it.
+- `isoFromSeriesDate`, `date_from_series_date`: one of the Bank's dates, such as `18 Dec 2025`, read as a date.
+- `seriesUrl`, `series_url`: the download URL for a range.
+- `urllib_transport`, in Python alone: the transport used by default, to wrap rather than replace.
+- `SERIES_CODE`, `SERIES_STARTS_ON`, `USER_AGENT`: the series (`IUDBEDR`), the day it begins, and the user agent both packages send.
+- `BankRateSourceError`: raised with a `failure` of `http`, `not_csv`, `empty`, `timeout` or `network`, and the HTTP `status` where there was one.
 
 Everything that reaches the Bank takes the same options: `timeoutMs` in TypeScript or `timeout` in seconds in Python (15 seconds by default), `now` for the clock, and your own `fetch` in TypeScript or `transport` in Python, to route the request through whatever HTTP client or proxy you already use. A Python transport takes the URL and the timeout and returns the status and the body as text. It should not follow redirects, since the Bank reports a bad request by redirecting to an error page, and it should send `USER_AGENT`, since the Bank's firewall refuses Python's default:
 
