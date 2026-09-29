@@ -4,6 +4,8 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-29
+
 ### Added
 
 - `ratesBetween` (`rates_between` in Python) splits a span into the periods over which Bank Rate held, each with its first and last day and its count of days, for interest at Bank Rate plus a margin; it carries the pending decision and the beyond-schedule flag of the span's last day, and works offline on any history
@@ -15,6 +17,7 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 - A range that starts after today returns no observations without asking the Bank, which answers such a range with a redirect to its error page
 - The TypeScript bundled history and schedule are frozen and the public data types are readonly, so no caller can change them under every other caller in the process, as Python never allowed
 - The workflows use the current GitHub actions, CI and the publish build check the Python types with mypy in strict mode, the PyPI upload skips files it already holds, and the snapshot refresh refuses to write a history that would lose a bundled change
+- The bundled history is refreshed to 28 September 2026; Bank Rate is unchanged at 3.75% since 18 December 2025
 
 ### Fixed
 

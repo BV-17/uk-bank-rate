@@ -1,7 +1,7 @@
 {
   "source": "Bank of England Database, series IUDBEDR",
   "licence": "Open Government Licence v3.0",
-  "observedTo": "2026-09-25",
+  "observedTo": "2026-09-28",
   "changes": [
     ["1975-01-02", "11.5"],
     ["1975-01-20", "11.25"],

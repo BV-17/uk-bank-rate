@@ -11,7 +11,7 @@
 ![pytest](https://img.shields.io/badge/pytest-tested-0a9edc?logo=pytest&logoColor=white)
 
 ![Status](https://img.shields.io/badge/Status-Alpha-d29922)
-![Version](https://img.shields.io/badge/Version-0.2.2-0a7ea4)
+![Version](https://img.shields.io/badge/Version-0.3.0-0a7ea4)
 ![Changelog](https://img.shields.io/badge/Changelog-Keep_a_Changelog-e05735)
 ![Claude](https://img.shields.io/badge/Claude-AI_Assisted-cc785c?logo=anthropic&logoColor=white)
 ![Licence](https://img.shields.io/badge/Licence-MIT-3da639?logo=opensourceinitiative&logoColor=white)
