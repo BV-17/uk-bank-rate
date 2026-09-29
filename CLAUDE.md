@@ -53,7 +53,7 @@ Both packages share one version. A release bumps `typescript/package.json` (and 
 
 ## Conventions
 
-UK English in prose. Box-drawing section headers (`───`) padded to 79 characters, as labels of a few words; no other comments and no docstrings. Named exports only in TypeScript. Strict TypeScript with no `any`. No em or en dashes in `README.md`, the package READMEs or the changelog.
+UK English in prose. Box-drawing section headers (`───`) padded to 79 characters, as labels of a few words; no other comments and no docstrings. Named exports only in TypeScript. Strict TypeScript with no `any`. No em or en dashes in `README.md`, the package READMEs or the changelog. `README.md` keeps code lines within 60 characters and lists the API as bullets grouped by purpose rather than as a table, so nothing scrolls sideways or gets squeezed in GitHub's README column, which is 638px at a 1000px window; a three-column API table squeezed its descriptions into a sliver there (29 Sep 2026).
 
 ## Tooling
 
