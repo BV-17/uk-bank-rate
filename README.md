@@ -138,7 +138,7 @@ Every name below is the TypeScript one first and the Python one second, and the 
 **Histories**
 
 - `bundledHistory`, `bundled_history`: every change since 2 January 1975, as shipped with the release.
-- `fetchBankRateHistory`, `fetch_bank_rate_history`: the bundled history, or one you hold, brought up to date by fetching only the days since it ends.
+- `fetchBankRateHistory`, `fetch_bank_rate_history`: the bundled history, or one you hold, brought up to date by fetching only its last week and the days since.
 - `fetchBankRateObservations`, `fetch_bank_rate_observations`: the daily series between two dates, straight from the Bank. A range that starts after today has no observations yet, so it is answered without asking.
 - `historyFromObservations`, `history_from_observations`: a history built from daily observations.
 - `extendHistory`, `extend_history`: a history extended by newer observations.
@@ -218,7 +218,7 @@ except BankRateSourceError:
 
 - **Source**: the Bank of England Database, series `IUDBEDR` (Official Bank Rate), daily from 2 January 1975, through the CSV download the Bank documents on its help page for automatic use.
 - **Bundled history**: every change since 1975 ships inside both packages and is refreshed at each release, so a live call fetches days, not fifty years. Its first entry, 11.5% on 2 January 1975, is where the series begins rather than a change, so a reading from early 1975 gives that date as `effectiveFrom` although the rate was already in force.
-- **Schedule**: the Committee's decision dates for 2026 and 2027, from the Bank's published dates, added a year at a time as the Bank announces them.
+- **Schedule**: the Committee's decision dates from the Bank's published list, which runs a year or so ahead, with each new year added once the Bank announces it.
 - **Details learnt the hard way**: the Bank's firewall answers Python's default `urllib` user agent with `403 Access Denied`, so both packages send their own. A start date before 1963, when the Database itself begins, and a range that starts after today, each draw a redirect to an error page that still claims to be CSV, so both packages judge an answer by its status and its body, never by its headers, and accept it only when its first line names the series.
 
 ## Limits
@@ -253,7 +253,7 @@ uk-bank-rate/
 | Where | Command | What it does |
 |---|---|---|
 | root | `npm run sync` | Writes `shared/` into both packages' generated modules |
-| root | `npm run sync:check` | Fails if a generated module or licence copy has drifted from `shared/`, or any version disagrees |
+| root | `npm run sync:check` | Fails if a generated module has drifted from `shared/`, a licence copy from `LICENSE`, or any version disagrees |
 | root | `npm run snapshot` | Refreshes the bundled history from the Bank, then syncs |
 | `typescript/` | `npm test`, `npm run typecheck`, `npm run build` | The TypeScript suite, strict typecheck and build |
 | `python/` | `python -m pytest`, `python -m mypy --strict src` | The Python suite and strict type check |
