@@ -5,6 +5,7 @@ from uk_bank_rate._current import fetch_bank_rate_history, get_bank_rate
 from uk_bank_rate._generated import SERIES_CODE, SERIES_STARTS_ON
 from uk_bank_rate._history import extend_history, history_from_observations
 from uk_bank_rate._parse import date_from_series_date, parse_bank_rate_csv
+from uk_bank_rate._periods import rates_between
 from uk_bank_rate._reading import rate_on
 from uk_bank_rate._schedule import (
     SCHEDULED_DECISIONS,
@@ -18,6 +19,8 @@ from uk_bank_rate._types import (
     BankRateChange,
     BankRateHistory,
     BankRateObservation,
+    BankRatePeriod,
+    BankRatePeriods,
     BankRateReading,
     CurrentBankRate,
     PendingDecision,
@@ -37,6 +40,8 @@ __all__ = [
     "BankRateChange",
     "BankRateHistory",
     "BankRateObservation",
+    "BankRatePeriod",
+    "BankRatePeriods",
     "BankRateReading",
     "BankRateSourceError",
     "CurrentBankRate",
@@ -56,6 +61,7 @@ __all__ = [
     "next_scheduled_decision",
     "parse_bank_rate_csv",
     "rate_on",
+    "rates_between",
     "series_url",
     "urllib_transport",
 ]

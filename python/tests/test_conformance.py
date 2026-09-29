@@ -16,6 +16,7 @@ from uk_bank_rate import (
     BankRateChange,
     BankRateHistory,
     BankRateObservation,
+    BankRatePeriod,
     BankRateSourceError,
     PendingDecision,
     date_from_series_date,
@@ -28,6 +29,7 @@ from uk_bank_rate import (
     next_scheduled_decision,
     parse_bank_rate_csv,
     rate_on,
+    rates_between,
 )
 
 # ─── Shared Cases ────────────────────────────────────────────────────────────
@@ -49,6 +51,11 @@ def _observations(rows: list[list[str]]) -> list[BankRateObservation]:
 def _history(shape: dict[str, Any]) -> BankRateHistory:
     changes = tuple(BankRateChange(date=datetime.date.fromisoformat(day), rate=Decimal(rate)) for day, rate in shape["changes"])
     return BankRateHistory(changes=changes, observed_to=datetime.date.fromisoformat(shape["observedTo"]))
+
+def _pending(shape: dict[str, Any] | None) -> PendingDecision | None:
+    if shape is None:
+        return None
+    return PendingDecision(date=datetime.date.fromisoformat(shape["date"]), announced=shape["announced"])
 
 # ─── Parsing ─────────────────────────────────────────────────────────────────
 
@@ -102,12 +109,26 @@ def test_readings(case: dict[str, Any]) -> None:
     assert reading.rate == Decimal(expected["rate"])
     assert reading.effective_from == _day(expected["effectiveFrom"])
     assert reading.observed_to == _day(expected["observedTo"])
-    pending = expected["pendingDecision"]
-    expected_pending = None if pending is None else PendingDecision(
-        date=datetime.date.fromisoformat(pending["date"]), announced=pending["announced"],
-    )
-    assert reading.pending_decision == expected_pending
+    assert reading.pending_decision == _pending(expected["pendingDecision"])
     assert reading.beyond_schedule is expected["beyondSchedule"]
+
+# ─── Periods ─────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("case", _cases("periods"))
+def test_periods(case: dict[str, Any]) -> None:
+    span = rates_between(_history(case["history"]), case["start"], case["end"], _moment(case["now"]))
+    expected = case["expected"]
+    if expected is None:
+        assert span is None
+        return
+    assert span is not None
+    assert span.periods == tuple(
+        BankRatePeriod(start=datetime.date.fromisoformat(start), end=datetime.date.fromisoformat(end), rate=Decimal(rate), days=days)
+        for start, end, rate, days in expected["periods"]
+    )
+    assert span.observed_to == _day(expected["observedTo"])
+    assert span.pending_decision == _pending(expected["pendingDecision"])
+    assert span.beyond_schedule is expected["beyondSchedule"]
 
 # ─── Answers ─────────────────────────────────────────────────────────────────
 

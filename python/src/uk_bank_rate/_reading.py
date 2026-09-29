@@ -11,7 +11,7 @@ from uk_bank_rate._types import BankRateHistory, BankRateReading, PendingDecisio
 
 # ─── Pending Decisions ───────────────────────────────────────────────────────
 
-def _pending_decision_by(
+def pending_decision_by(
     history: BankRateHistory, day: datetime.date, now: datetime.datetime,
 ) -> PendingDecision | None:
     decision = next(
@@ -24,6 +24,9 @@ def _pending_decision_by(
     if decision is None:
         return None
     return PendingDecision(date=decision, announced=is_decision_announced(decision, now))
+
+def is_beyond_schedule(history: BankRateHistory, day: datetime.date) -> bool:
+    return day > history.observed_to and (not SCHEDULED_DECISIONS or day > SCHEDULED_DECISIONS[-1])
 
 # ─── Readings ────────────────────────────────────────────────────────────────
 
@@ -39,6 +42,6 @@ def rate_on(
         rate=in_force.rate,
         effective_from=in_force.date,
         observed_to=history.observed_to,
-        pending_decision=_pending_decision_by(history, day, moment),
-        beyond_schedule=day > history.observed_to and (not SCHEDULED_DECISIONS or day > SCHEDULED_DECISIONS[-1]),
+        pending_decision=pending_decision_by(history, day, moment),
+        beyond_schedule=is_beyond_schedule(history, day),
     )

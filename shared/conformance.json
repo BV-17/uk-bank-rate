@@ -168,6 +168,79 @@
       "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-25", "pendingDecision": { "date": "2026-11-05", "announced": false }, "beyondSchedule": false }
     }
   ],
+  "periods": [
+    {
+      "name": "a span with no change in it is one period",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "start": "2026-01-01",
+      "end": "2026-03-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "periods": [["2026-01-01", "2026-03-31", "3.75", 90]], "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "each change opens a period and closes the one before it on the eve",
+      "history": { "changes": [["2025-05-08", "4.25"], ["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "start": "2025-06-01",
+      "end": "2026-01-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": {
+        "periods": [["2025-06-01", "2025-08-06", "4.25", 67], ["2025-08-07", "2025-12-17", "4", 133], ["2025-12-18", "2026-01-31", "3.75", 45]],
+        "observedTo": "2026-09-25",
+        "pendingDecision": null,
+        "beyondSchedule": false
+      }
+    },
+    {
+      "name": "a change on the first day starts the span at the new rate",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "start": "2025-12-18",
+      "end": "2025-12-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "periods": [["2025-12-18", "2025-12-31", "3.75", 14]], "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "a change on the last day is a period of one day",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "start": "2025-12-01",
+      "end": "2025-12-18",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": {
+        "periods": [["2025-12-01", "2025-12-17", "4", 17], ["2025-12-18", "2025-12-18", "3.75", 1]],
+        "observedTo": "2026-09-25",
+        "pendingDecision": null,
+        "beyondSchedule": false
+      }
+    },
+    {
+      "name": "nothing is known for a span that starts before the history",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "start": "2025-08-06",
+      "end": "2025-12-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": null
+    },
+    {
+      "name": "a span past the published data names the decision it cannot see yet",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "start": "2026-09-01",
+      "end": "2026-12-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": {
+        "periods": [["2026-09-01", "2026-12-31", "3.75", 122]],
+        "observedTo": "2026-09-25",
+        "pendingDecision": { "date": "2026-11-05", "announced": false },
+        "beyondSchedule": false
+      }
+    },
+    {
+      "name": "a span past the published schedule is flagged as beyond it",
+      "history": { "changes": [["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2027-12-20" },
+      "start": "2027-12-01",
+      "end": "2028-01-31",
+      "now": "2028-02-02T09:00:00Z",
+      "expected": { "periods": [["2027-12-01", "2028-01-31", "3.75", 62]], "observedTo": "2027-12-20", "pendingDecision": null, "beyondSchedule": true }
+    }
+  ],
   "answers": [
     {
       "name": "a CSV answer is read, oldest first",

@@ -35,6 +35,20 @@ export interface CurrentBankRate extends BankRateReading {
   readonly nextDecision: string | null;
 }
 
+export interface BankRatePeriod {
+  readonly start: string;
+  readonly end: string;
+  readonly rate: number;
+  readonly days: number;
+}
+
+export interface BankRatePeriods {
+  readonly periods: readonly BankRatePeriod[];
+  readonly observedTo: string;
+  readonly pendingDecision: PendingDecision | null;
+  readonly beyondSchedule: boolean;
+}
+
 // ─── Fetching ───────────────────────────────────────────────────────────────
 
 export interface FetchOptions {

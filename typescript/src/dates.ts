@@ -23,3 +23,6 @@ export const shiftIsoDate = (isoDate: string, days: number): string => {
   shifted.setUTCDate(shifted.getUTCDate() + days);
   return shifted.toISOString().slice(0, 10);
 };
+
+export const daysBetween = (start: string, end: string): number =>
+  Math.round((Date.parse(`${end}T00:00:00Z`) - Date.parse(`${start}T00:00:00Z`)) / 86_400_000);

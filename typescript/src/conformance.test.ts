@@ -10,11 +10,12 @@ import { describe, expect, it } from 'vitest';
 
 import { extendHistory, historyFromObservations } from './history.js';
 import { isoFromSeriesDate, parseBankRateCsv } from './parse.js';
+import { ratesBetween } from './periods.js';
 import { rateOn } from './reading.js';
 import { isDecisionAnnounced, isDecisionReflected, londonDate, nextScheduledDecision } from './schedule.js';
 import { fetchBankRateObservations } from './source.js';
 
-import type { BankRateHistory, BankRateObservation, BankRateReading, SourceFailure } from './types.js';
+import type { BankRateHistory, BankRateObservation, BankRatePeriods, BankRateReading, SourceFailure } from './types.js';
 
 // ─── Case Shapes ────────────────────────────────────────────────────────────
 
@@ -28,6 +29,13 @@ interface HistoryShape {
 interface ReadingShape {
   rate: string;
   effectiveFrom: string;
+  observedTo: string;
+  pendingDecision: { date: string; announced: boolean } | null;
+  beyondSchedule: boolean;
+}
+
+interface PeriodsShape {
+  periods: [string, string, string, number][];
   observedTo: string;
   pendingDecision: { date: string; announced: boolean } | null;
   beyondSchedule: boolean;
@@ -47,6 +55,7 @@ interface ConformanceCases {
   reflections: (NamedCase & { decision: string; observedTo: string; now: string; expected: boolean })[];
   nextDecisions: (NamedCase & { now: string; expected: string | null })[];
   readings: (NamedCase & { history: HistoryShape; date: string; now: string; expected: ReadingShape | null })[];
+  periods: (NamedCase & { history: HistoryShape; start: string; end: string; now: string; expected: PeriodsShape | null })[];
   answers: (NamedCase & { status: number; body: string; expected?: Row[]; failure?: SourceFailure })[];
 }
 
@@ -66,6 +75,12 @@ const historyFrom = (shape: HistoryShape): BankRateHistory => ({
 
 const readingFrom = (shape: ReadingShape | null): BankRateReading | null =>
   shape === null ? null : { ...shape, rate: Number(shape.rate) };
+
+const periodsFrom = (shape: PeriodsShape | null): BankRatePeriods | null =>
+  shape === null ? null : {
+    ...shape,
+    periods: shape.periods.map(([start, end, rate, days]) => ({ start, end, rate: Number(rate), days })),
+  };
 
 const answering = (status: number, body: string): typeof globalThis.fetch => async () => (
   status >= 200 && status <= 599
@@ -132,6 +147,14 @@ describe('the next decision', () => {
 describe('readings', () => {
   it.each(CASES.readings)('$name', ({ history, date, now, expected }) => {
     expect(rateOn(historyFrom(history), date, new Date(now))).toEqual(readingFrom(expected));
+  });
+});
+
+// ─── Periods ────────────────────────────────────────────────────────────────
+
+describe('periods', () => {
+  it.each(CASES.periods)('$name', ({ history, start, end, now, expected }) => {
+    expect(ratesBetween(historyFrom(history), start, end, new Date(now))).toEqual(periodsFrom(expected));
   });
 });
 

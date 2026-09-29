@@ -43,6 +43,20 @@ class CurrentBankRate(BankRateReading):
     as_of: datetime.date
     next_decision: datetime.date | None
 
+@dataclass(frozen=True, slots=True)
+class BankRatePeriod:
+    start: datetime.date
+    end: datetime.date
+    rate: Decimal
+    days: int
+
+@dataclass(frozen=True, slots=True)
+class BankRatePeriods:
+    periods: tuple[BankRatePeriod, ...]
+    observed_to: datetime.date
+    pending_decision: PendingDecision | None
+    beyond_schedule: bool
+
 # ─── Fetching ────────────────────────────────────────────────────────────────
 
 SourceFailure = Literal["http", "not_csv", "empty", "timeout", "network"]

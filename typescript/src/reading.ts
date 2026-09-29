@@ -9,12 +9,15 @@ import type { BankRateHistory, BankRateReading, PendingDecision } from './types.
 
 // ─── Pending Decisions ──────────────────────────────────────────────────────
 
-const pendingDecisionBy = (history: BankRateHistory, date: string, now: Date): PendingDecision | null => {
+export const pendingDecisionBy = (history: BankRateHistory, date: string, now: Date): PendingDecision | null => {
   const decisionDate = SCHEDULED_DECISIONS.find(
     (candidate) => candidate <= date && !isDecisionReflected(candidate, history.observedTo, now),
   );
   return decisionDate ? { date: decisionDate, announced: isDecisionAnnounced(decisionDate, now) } : null;
 };
+
+export const isBeyondSchedule = (history: BankRateHistory, date: string): boolean =>
+  date > history.observedTo && date > (SCHEDULED_DECISIONS.at(-1) ?? '');
 
 // ─── Readings ───────────────────────────────────────────────────────────────
 
@@ -27,6 +30,6 @@ export const rateOn = (history: BankRateHistory, date: string, now: Date = new D
     effectiveFrom: inForce.date,
     observedTo: history.observedTo,
     pendingDecision: pendingDecisionBy(history, date, now),
-    beyondSchedule: date > history.observedTo && date > (SCHEDULED_DECISIONS.at(-1) ?? ''),
+    beyondSchedule: isBeyondSchedule(history, date),
   };
 };
