@@ -14,7 +14,7 @@ export const USER_AGENT = 'uk-bank-rate (+https://github.com/BV-17/uk-bank-rate)
 
 // ─── Scheduled Decisions ────────────────────────────────────────────────────
 
-export const SCHEDULED_DECISIONS: readonly string[] = [
+export const SCHEDULED_DECISIONS: readonly string[] = Object.freeze([
   '2026-02-05',
   '2026-03-19',
   '2026-04-30',
@@ -31,7 +31,7 @@ export const SCHEDULED_DECISIONS: readonly string[] = [
   '2027-09-16',
   '2027-11-04',
   '2027-12-16',
-];
+]);
 
 // ─── Bank Rate Changes ──────────────────────────────────────────────────────
 
@@ -299,7 +299,7 @@ const CHANGES: readonly (readonly [string, number])[] = [
 
 // ─── Bundled History ────────────────────────────────────────────────────────
 
-export const bundledHistory: BankRateHistory = {
+export const bundledHistory: BankRateHistory = Object.freeze({
   observedTo: '2026-09-25',
-  changes: CHANGES.map(([date, rate]) => ({ date, rate })),
-};
+  changes: Object.freeze(CHANGES.map(([date, rate]) => Object.freeze({ date, rate }))),
+});

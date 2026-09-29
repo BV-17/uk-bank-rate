@@ -1,38 +1,38 @@
 // ─── Series ─────────────────────────────────────────────────────────────────
 
 export interface BankRateObservation {
-  date: string;
-  rate: number;
+  readonly date: string;
+  readonly rate: number;
 }
 
 export interface BankRateChange {
-  date: string;
-  rate: number;
+  readonly date: string;
+  readonly rate: number;
 }
 
 export interface BankRateHistory {
-  changes: readonly BankRateChange[];
-  observedTo: string;
+  readonly changes: readonly BankRateChange[];
+  readonly observedTo: string;
 }
 
 // ─── Readings ───────────────────────────────────────────────────────────────
 
 export interface PendingDecision {
-  date: string;
-  announced: boolean;
+  readonly date: string;
+  readonly announced: boolean;
 }
 
 export interface BankRateReading {
-  rate: number;
-  effectiveFrom: string;
-  observedTo: string;
-  pendingDecision: PendingDecision | null;
-  beyondSchedule: boolean;
+  readonly rate: number;
+  readonly effectiveFrom: string;
+  readonly observedTo: string;
+  readonly pendingDecision: PendingDecision | null;
+  readonly beyondSchedule: boolean;
 }
 
 export interface CurrentBankRate extends BankRateReading {
-  asOf: string;
-  nextDecision: string | null;
+  readonly asOf: string;
+  readonly nextDecision: string | null;
 }
 
 // ─── Fetching ───────────────────────────────────────────────────────────────

@@ -26,6 +26,12 @@ describe('bundledHistory', () => {
     expect(bundledHistory.observedTo >= (bundledHistory.changes.at(-1)?.date ?? '')).toBe(true);
   });
 
+  it('is frozen, so no caller can change it under every other', () => {
+    expect(Object.isFrozen(bundledHistory)).toBe(true);
+    expect(Object.isFrozen(bundledHistory.changes)).toBe(true);
+    expect(bundledHistory.changes.every((change) => Object.isFrozen(change))).toBe(true);
+  });
+
   it.each([
     ['2009-03-05', 0.5],
     ['2016-08-04', 0.25],
@@ -45,6 +51,10 @@ describe('bundledHistory', () => {
 describe('SCHEDULED_DECISIONS', () => {
   it('is in date order with no repeats', () => {
     expect([...new Set(SCHEDULED_DECISIONS)].sort()).toEqual(SCHEDULED_DECISIONS);
+  });
+
+  it('is frozen, so no caller can change it under every other', () => {
+    expect(Object.isFrozen(SCHEDULED_DECISIONS)).toBe(true);
   });
 
   it('falls on Thursdays, as every scheduled decision does', () => {
