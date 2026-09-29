@@ -41,13 +41,18 @@ npm install uk-bank-rate
 ```
 
 ```ts
-import { bundledHistory, getBankRate, rateOn } from 'uk-bank-rate';
+import {
+  bundledHistory,
+  getBankRate,
+  rateOn,
+} from 'uk-bank-rate';
 
 const current = await getBankRate();
-console.log(current.rate, current.effectiveFrom, current.nextDecision);
+console.log(current.rate, current.effectiveFrom);
 
+// The Covid low: 0.1, in force from 2020-03-19
 const covidLow = rateOn(bundledHistory, '2020-06-01');
-console.log(covidLow?.rate, covidLow?.effectiveFrom); // 0.1 '2020-03-19'
+console.log(covidLow?.rate, covidLow?.effectiveFrom);
 ```
 
 `getBankRate()` resolves to an object like this, with every date an ISO string:
@@ -71,16 +76,22 @@ pip install uk-bank-rate
 ```
 
 ```python
-from uk_bank_rate import bundled_history, get_bank_rate, rate_on
+from uk_bank_rate import (
+    bundled_history,
+    get_bank_rate,
+    rate_on,
+)
 
 current = get_bank_rate()
-print(current.rate, current.effective_from, current.next_decision)
+print(current.rate, current.effective_from)
 
-if current.pending_decision and current.pending_decision.announced:
-    print("A decision was announced today that the published data does not show yet")
+pending = current.pending_decision
+if pending and pending.announced:
+    print("Announced today, not yet in the published data")
 
+# The Covid low: 0.1, in force from 2020-03-19
 covid_low = rate_on(bundled_history, "2020-06-01")
-print(covid_low.rate, covid_low.effective_from)  # 0.1 2020-03-19
+print(covid_low.rate, covid_low.effective_from)
 ```
 
 Dates come back as `datetime.date`, rates as `Decimal("3.75")`, and `now` must be a timezone-aware `datetime`, since the package would rather refuse a naive one than guess which clock it came from.
@@ -93,17 +104,23 @@ Interest at Bank Rate plus a margin "from time to time", as loan agreements put 
 from decimal import Decimal
 from uk_bank_rate import bundled_history, rates_between
 
-span = rates_between(bundled_history, "2025-01-01", "2025-12-31")
-interest = sum(Decimal("10000") * (period.rate + 2) / 100 * period.days / 365 for period in span.periods)
-print(round(interest, 2))  # 625.14, at 2% over Bank Rate on £10,000 through 2025
+# £10,000 at 2% over Bank Rate through 2025
+principal, margin = Decimal("10000"), 2
+start, end = "2025-01-01", "2025-12-31"
+span = rates_between(bundled_history, start, end)
+interest = sum(
+    principal * (period.rate + margin) * period.days
+    for period in span.periods
+) / 100 / 365
+print(round(interest, 2))  # 625.14
 ```
 
 ```ts
 import { bundledHistory, ratesBetween } from 'uk-bank-rate';
 
-for (const { start, end, rate, days } of ratesBetween(bundledHistory, '2025-01-01', '2025-12-31')?.periods ?? []) {
-  console.log(start, end, rate, days);
-}
+const [start, end] = ['2025-01-01', '2025-12-31'];
+const span = ratesBetween(bundledHistory, start, end);
+console.table(span?.periods);
 ```
 
 The 2025 span runs from 4.75% on 1 January to 3.75% from 18 December, one period for each rate. The result carries `pendingDecision` and `beyondSchedule` for the span's last day, so a span that runs into the hours after a decision, or past the published schedule, says so; and like `rateOn`, it answers `null` for a span that starts before the history does.
@@ -149,11 +166,13 @@ Everything that reaches the Bank takes the same options: `timeoutMs` in TypeScri
 import httpx
 from uk_bank_rate import USER_AGENT, get_bank_rate
 
-def through_httpx(url: str, timeout: float) -> tuple[int, str]:
-    response = httpx.get(url, timeout=timeout, headers={"User-Agent": USER_AGENT})
-    return response.status_code, response.text
+HEADERS = {"User-Agent": USER_AGENT}
 
-current = get_bank_rate(transport=through_httpx)
+def via_httpx(url: str, timeout: float) -> tuple[int, str]:
+    reply = httpx.get(url, timeout=timeout, headers=HEADERS)
+    return reply.status_code, reply.text
+
+current = get_bank_rate(transport=via_httpx)
 ```
 
 To keep a history of your own between calls, hold what `fetchBankRateHistory` returns and pass it back as `history`; only the days from a week before it ends are fetched. `getBankRate({ history })` reads from it the same way but does not hand back the extended copy, so a long-running service refreshes with `fetchBankRateHistory` and reads with `rateOn(history, londonDate())`.
@@ -163,16 +182,31 @@ To keep a history of your own between calls, hold what `fetchBankRateHistory` re
 Nothing guesses. A timeout, a refused connection, a redirect to the Bank's error page, a firewall refusal, a web page served in place of CSV, and an answer whose first line does not name the series or whose rows cannot be read each raise `BankRateSourceError` with its own `failure`, and the rate is never invented. A change to the Bank's format is reported as one rather than read as a quiet week. If you would rather fall back than fail, the bundled history answers offline, and its `pendingDecision` still tells you what it cannot know:
 
 ```ts
-import { BankRateSourceError, bundledHistory, getBankRate, londonDate, rateOn } from 'uk-bank-rate';
+import {
+  BankRateSourceError,
+  bundledHistory,
+  getBankRate,
+  londonDate,
+  rateOn,
+} from 'uk-bank-rate';
 
-const reading = await getBankRate().catch((error: unknown) => {
-  if (error instanceof BankRateSourceError) return rateOn(bundledHistory, londonDate());
-  throw error;
-});
+let reading;
+try {
+  reading = await getBankRate();
+} catch (error) {
+  if (!(error instanceof BankRateSourceError)) throw error;
+  reading = rateOn(bundledHistory, londonDate());
+}
 ```
 
 ```python
-from uk_bank_rate import BankRateSourceError, bundled_history, get_bank_rate, london_date, rate_on
+from uk_bank_rate import (
+    BankRateSourceError,
+    bundled_history,
+    get_bank_rate,
+    london_date,
+    rate_on,
+)
 
 try:
     reading = get_bank_rate()
