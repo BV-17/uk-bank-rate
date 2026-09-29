@@ -57,11 +57,26 @@ const observationFrom = (line: string): BankRateObservation | null => {
   return { date, rate: Number(rateText) };
 };
 
-export const parseBankRateCsv = (csv: string): BankRateObservation[] => {
+export interface SeriesTable {
+  header: string | null;
+  rows: number;
+  observations: BankRateObservation[];
+}
+
+export const columnsOf = (line: string): string[] => line.split(FIELD_SEPARATOR).map(trimmed);
+
+export const readSeriesTable = (csv: string): SeriesTable => {
+  const lines = csv.replace(BYTE_ORDER_MARK, '').split(LINE_BREAK).map(trimmed).filter((line) => line !== '');
   const observations: BankRateObservation[] = [];
-  for (const line of csv.replace(BYTE_ORDER_MARK, '').split(LINE_BREAK)) {
-    const observation = observationFrom(trimmed(line));
+  for (const line of lines) {
+    const observation = observationFrom(line);
     if (observation) observations.push(observation);
   }
-  return observations.sort((left, right) => left.date.localeCompare(right.date));
+  return {
+    header: lines[0] ?? null,
+    rows: Math.max(lines.length - 1, 0),
+    observations: observations.sort((left, right) => left.date.localeCompare(right.date)),
+  };
 };
+
+export const parseBankRateCsv = (csv: string): BankRateObservation[] => readSeriesTable(csv).observations;

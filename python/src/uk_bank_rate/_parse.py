@@ -3,6 +3,7 @@
 import datetime
 import re
 from decimal import Decimal
+from typing import NamedTuple
 
 # ─── Local Application Imports ───────────────────────────────────────────────
 
@@ -58,10 +59,23 @@ def _observation_from(line: str) -> BankRateObservation | None:
         return None
     return BankRateObservation(date=observed_on, rate=Decimal(rate_text))
 
+class SeriesTable(NamedTuple):
+    header: str | None
+    rows: int
+    observations: list[BankRateObservation]
+
+def columns_of(line: str) -> list[str]:
+    return [field.strip(EDGE_BLANKS) for field in FIELD_SEPARATOR.split(line)]
+
+def read_series_table(csv_text: str) -> SeriesTable:
+    lines = [line.strip(EDGE_BLANKS) for line in LINE_BREAK.split(csv_text.removeprefix(BYTE_ORDER_MARK))]
+    filled = [line for line in lines if line]
+    observations = [observation for line in filled if (observation := _observation_from(line)) is not None]
+    return SeriesTable(
+        header=filled[0] if filled else None,
+        rows=max(len(filled) - 1, 0),
+        observations=sorted(observations, key=lambda observation: observation.date),
+    )
+
 def parse_bank_rate_csv(csv_text: str) -> list[BankRateObservation]:
-    observations = []
-    for line in LINE_BREAK.split(csv_text.removeprefix(BYTE_ORDER_MARK)):
-        observation = _observation_from(line.strip(EDGE_BLANKS))
-        if observation is not None:
-            observations.append(observation)
-    return sorted(observations, key=lambda observation: observation.date)
+    return read_series_table(csv_text).observations

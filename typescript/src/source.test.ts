@@ -45,26 +45,10 @@ describe('seriesUrl', () => {
 
 // ─── Answers ────────────────────────────────────────────────────────────────
 
-describe('fetchBankRateObservations', () => {
-  it('reads a CSV answer', async () => {
-    const fetch = answering('DATE,IUDBEDR\n24 Sep 2026,3.75\n25 Sep 2026,3.75\n');
-    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).resolves.toEqual([
-      { date: '2026-09-24', rate: 3.75 },
-      { date: '2026-09-25', rate: 3.75 },
-    ]);
-  });
-
-  it('returns nothing for a range with no observations, as a weekend is', async () => {
-    await expect(fetchBankRateObservations('2026-09-26', '2026-09-27', { fetch: answering('DATE,IUDBEDR\n') })).resolves.toEqual([]);
-  });
-
-  it('treats the redirect to the error page as a failure, keeping its status', async () => {
+describe('what a refusal says', () => {
+  it('names itself as a BankRateSourceError', async () => {
     const fetch = answering('<body><h1>Object Moved</h1></body>', 302);
-    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toMatchObject({
-      name: 'BankRateSourceError',
-      failure: 'http',
-      status: 302,
-    });
+    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toMatchObject({ name: 'BankRateSourceError' });
   });
 
   it('reads the status 0 of an opaque redirect as a redirect', async () => {
@@ -77,13 +61,14 @@ describe('fetchBankRateObservations', () => {
     await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toThrow(/firewall/);
   });
 
-  it('refuses a web page served as a success', async () => {
-    const fetch = answering('<!DOCTYPE html><html><body>Maintenance</body></html>');
-    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toMatchObject({ failure: 'not_csv' });
+  it('says when an answer is not the series at all', async () => {
+    const fetch = answering('Service temporarily unavailable');
+    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toThrow(/something other than the IUDBEDR series/);
   });
 
-  it('refuses an empty body', async () => {
-    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch: answering('') })).rejects.toMatchObject({ failure: 'empty' });
+  it('says when its rows cannot be read, since the format may have changed', async () => {
+    const fetch = answering('DATE,IUDBEDR\n2026-09-24,3.75\n');
+    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch })).rejects.toThrow(/cannot read/);
   });
 });
 

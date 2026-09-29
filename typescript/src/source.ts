@@ -2,8 +2,9 @@
 
 import { assertIsoDate } from './dates.js';
 import { SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT } from './generated.js';
-import { parseBankRateCsv } from './parse.js';
+import { columnsOf, readSeriesTable } from './parse.js';
 
+import type { SeriesTable } from './parse.js';
 import type { BankRateObservation, FetchOptions, SourceFailure } from './types.js';
 
 // ─── Constants ──────────────────────────────────────────────────────────────
@@ -61,18 +62,25 @@ const statusExplanation = (status: number): string => {
   return '';
 };
 
+const refusalOf = (table: SeriesTable): [SourceFailure, string] | null => {
+  if (table.header === null) return ['empty', 'returned an empty response'];
+  if (table.header.startsWith('<')) return ['not_csv', 'returned a web page instead of CSV'];
+  if (!columnsOf(table.header).includes(SERIES_CODE)) return ['not_csv', `returned something other than the ${SERIES_CODE} series`];
+  if (table.rows > 0 && table.observations.length === 0) {
+    return ['not_csv', 'returned rows this package cannot read, so its format may have changed'];
+  }
+  return null;
+};
+
 const readSeriesBody = (status: number, body: string): BankRateObservation[] => {
   if (status !== 200) {
     const message = `The Bank of England Database answered HTTP ${status}${statusExplanation(status)}`;
     throw new BankRateSourceError('http', message, status);
   }
-  if (body.trim().length === 0) {
-    throw new BankRateSourceError('empty', 'The Bank of England Database returned an empty response', status);
-  }
-  if (body.trimStart().startsWith('<')) {
-    throw new BankRateSourceError('not_csv', 'The Bank of England Database returned a web page instead of CSV', status);
-  }
-  return parseBankRateCsv(body);
+  const table = readSeriesTable(body);
+  const refused = refusalOf(table);
+  if (refused) throw new BankRateSourceError(refused[0], `The Bank of England Database ${refused[1]}`, status);
+  return table.observations;
 };
 
 // ─── Fetch ──────────────────────────────────────────────────────────────────

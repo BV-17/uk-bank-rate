@@ -12,8 +12,9 @@ import { extendHistory, historyFromObservations } from './history.js';
 import { isoFromSeriesDate, parseBankRateCsv } from './parse.js';
 import { rateOn } from './reading.js';
 import { isDecisionAnnounced, isDecisionReflected, londonDate, nextScheduledDecision } from './schedule.js';
+import { fetchBankRateObservations } from './source.js';
 
-import type { BankRateHistory, BankRateObservation, BankRateReading } from './types.js';
+import type { BankRateHistory, BankRateObservation, BankRateReading, SourceFailure } from './types.js';
 
 // ─── Case Shapes ────────────────────────────────────────────────────────────
 
@@ -46,6 +47,7 @@ interface ConformanceCases {
   reflections: (NamedCase & { decision: string; observedTo: string; now: string; expected: boolean })[];
   nextDecisions: (NamedCase & { now: string; expected: string | null })[];
   readings: (NamedCase & { history: HistoryShape; date: string; now: string; expected: ReadingShape | null })[];
+  answers: (NamedCase & { status: number; body: string; expected?: Row[]; failure?: SourceFailure })[];
 }
 
 // ─── Shared Cases ───────────────────────────────────────────────────────────
@@ -64,6 +66,12 @@ const historyFrom = (shape: HistoryShape): BankRateHistory => ({
 
 const readingFrom = (shape: ReadingShape | null): BankRateReading | null =>
   shape === null ? null : { ...shape, rate: Number(shape.rate) };
+
+const answering = (status: number, body: string): typeof globalThis.fetch => async () => (
+  status >= 200 && status <= 599
+    ? new Response(body, { status })
+    : Object.defineProperty(new Response(body), 'status', { value: status })
+);
 
 // ─── Parsing ────────────────────────────────────────────────────────────────
 
@@ -124,5 +132,15 @@ describe('the next decision', () => {
 describe('readings', () => {
   it.each(CASES.readings)('$name', ({ history, date, now, expected }) => {
     expect(rateOn(historyFrom(history), date, new Date(now))).toEqual(readingFrom(expected));
+  });
+});
+
+// ─── Answers ────────────────────────────────────────────────────────────────
+
+describe('answers from the Database', () => {
+  it.each(CASES.answers)('$name', async ({ status, body, expected, failure }) => {
+    const attempt = fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch: answering(status, body) });
+    if (failure) await expect(attempt).rejects.toMatchObject({ failure, status });
+    else await expect(attempt).resolves.toEqual(observationsFrom(expected ?? []));
   });
 });

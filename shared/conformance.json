@@ -167,5 +167,46 @@
       "now": "2026-09-28T09:00:00Z",
       "expected": { "rate": "3.75", "effectiveFrom": "2025-12-18", "observedTo": "2026-09-25", "pendingDecision": { "date": "2026-11-05", "announced": false }, "beyondSchedule": false }
     }
+  ],
+  "answers": [
+    {
+      "name": "a CSV answer is read, oldest first",
+      "status": 200,
+      "body": "DATE,IUDBEDR\r\n25 Sep 2026,3.75\r\n24 Sep 2026,3.75\r\n",
+      "expected": [["2026-09-24", "3.75"], ["2026-09-25", "3.75"]]
+    },
+    { "name": "the header alone is a range with no observations, as a weekend is", "status": 200, "body": "DATE,IUDBEDR\r\n", "expected": [] },
+    {
+      "name": "a byte order mark and a tab-separated header are read",
+      "status": 200,
+      "body": "﻿DATE\tIUDBEDR\r\n25 Sep 2026\t3.75\r\n",
+      "expected": [["2026-09-25", "3.75"]]
+    },
+    {
+      "name": "one unreadable row among readable ones is skipped",
+      "status": 200,
+      "body": "DATE,IUDBEDR\r\n24 Sep 2026,3.75\r\n25 Sep 2026,n/a\r\n",
+      "expected": [["2026-09-24", "3.75"]]
+    },
+    {
+      "name": "the redirect to the error page is refused, keeping its status",
+      "status": 302,
+      "body": "<head><title>Object moved</title></head>\n<body><h1>Object Moved</h1>This object may be found <a HREF=\"ErrorPage.asp?ei=1018\">here</a>.</body>\n",
+      "failure": "http"
+    },
+    { "name": "an opaque redirect, which strict Fetch runtimes report as status 0, is refused", "status": 0, "body": "", "failure": "http" },
+    { "name": "the firewall's refusal is refused", "status": 403, "body": "<HTML><HEAD>\n<TITLE>Access Denied</TITLE>\n</HEAD></HTML>\n", "failure": "http" },
+    { "name": "a server error is refused", "status": 503, "body": "Service Unavailable", "failure": "http" },
+    { "name": "an empty body is refused", "status": 200, "body": "", "failure": "empty" },
+    { "name": "a body of blank lines is refused as empty", "status": 200, "body": " \r\n\t\r\n", "failure": "empty" },
+    { "name": "a web page served as a success is refused", "status": 200, "body": "\n<!DOCTYPE html><html><body>Maintenance</body></html>", "failure": "not_csv" },
+    { "name": "plain text served as a success is refused rather than read as no data", "status": 200, "body": "Service temporarily unavailable\r\n", "failure": "not_csv" },
+    { "name": "a table of another series is refused", "status": 200, "body": "DATE,IUDSOIA\r\n25 Sep 2026,3.7268\r\n", "failure": "not_csv" },
+    {
+      "name": "rows the package cannot read are refused rather than read as no data",
+      "status": 200,
+      "body": "DATE,IUDBEDR\r\n2026-09-24,3.75\r\n2026-09-25,3.75\r\n",
+      "failure": "not_csv"
+    }
   ]
 }

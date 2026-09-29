@@ -5,7 +5,6 @@ import threading
 import urllib.error
 import urllib.parse
 from collections.abc import Iterator
-from decimal import Decimal
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 # ─── Third-Party Libraries ───────────────────────────────────────────────────
@@ -14,14 +13,14 @@ import pytest
 
 # ─── Local Application Imports ───────────────────────────────────────────────
 
-from uk_bank_rate import BankRateObservation, BankRateSourceError, fetch_bank_rate_observations, series_url, urllib_transport
+from uk_bank_rate import BankRateSourceError, Transport, fetch_bank_rate_observations, series_url, urllib_transport
 
 # ─── Fakes ───────────────────────────────────────────────────────────────────
 
-def _answering(body: str, status: int = 200):
+def _answering(body: str, status: int = 200) -> Transport:
     return lambda url, timeout: (status, body)
 
-def _raising(error: BaseException):
+def _raising(error: BaseException) -> Transport:
     def transport(url: str, timeout: float) -> tuple[int, str]:
         raise error
     return transport
@@ -79,28 +78,19 @@ def test_the_url_refuses_bad_dates_and_a_backwards_range() -> None:
 
 # ─── Answers ─────────────────────────────────────────────────────────────────
 
-def test_a_csv_answer_is_read() -> None:
-    observations = fetch_bank_rate_observations(
-        "2026-09-24", "2026-09-25", transport=_answering("DATE,IUDBEDR\n24 Sep 2026,3.75\n25 Sep 2026,3.75\n"),
-    )
-    assert observations == [
-        BankRateObservation(date=datetime.date(2026, 9, 24), rate=Decimal("3.75")),
-        BankRateObservation(date=datetime.date(2026, 9, 25), rate=Decimal("3.75")),
-    ]
-
-def test_a_range_with_no_observations_returns_nothing() -> None:
-    assert fetch_bank_rate_observations("2026-09-26", "2026-09-27", transport=_answering("DATE,IUDBEDR\n")) == []
-
 @pytest.mark.parametrize(
     ("status", "body", "failure", "wording"),
     [
         (302, "<body><h1>Object Moved</h1></body>", "http", "error page"),
+        (0, "", "http", "error page"),
         (403, "<TITLE>Access Denied</TITLE>", "http", "firewall"),
         (200, "<!DOCTYPE html><html><body>Maintenance</body></html>", "not_csv", "web page"),
         (200, "", "empty", "empty"),
+        (200, "Service temporarily unavailable", "not_csv", "something other than the IUDBEDR series"),
+        (200, "DATE,IUDBEDR\n2026-09-24,3.75\n", "not_csv", "cannot read"),
     ],
 )
-def test_a_bad_answer_is_refused(status: int, body: str, failure: str, wording: str) -> None:
+def test_a_refusal_says_what_went_wrong(status: int, body: str, failure: str, wording: str) -> None:
     with pytest.raises(BankRateSourceError, match=wording) as raised:
         fetch_bank_rate_observations("2026-09-24", "2026-09-25", transport=_answering(body, status))
     assert raised.value.failure == failure

@@ -11,7 +11,7 @@ from typing import IO
 
 from uk_bank_rate._dates import as_date
 from uk_bank_rate._generated import SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT
-from uk_bank_rate._parse import parse_bank_rate_csv
+from uk_bank_rate._parse import SeriesTable, columns_of, read_series_table
 from uk_bank_rate._types import BankRateObservation, SourceFailure, Transport
 
 # ─── Constants ───────────────────────────────────────────────────────────────
@@ -72,21 +72,32 @@ def urllib_transport(url: str, timeout: float) -> tuple[int, str]:
 # ─── Response ────────────────────────────────────────────────────────────────
 
 def _status_explanation(status: int) -> str:
-    if 300 <= status < 400:
+    if status == 0 or 300 <= status < 400:
         return ", redirecting to its error page"
     if status == 403:
         return ", its firewall refusing the request"
     return ""
 
+def _refusal_of(table: SeriesTable) -> tuple[SourceFailure, str] | None:
+    if table.header is None:
+        return "empty", "returned an empty response"
+    if table.header.startswith("<"):
+        return "not_csv", "returned a web page instead of CSV"
+    if SERIES_CODE not in columns_of(table.header):
+        return "not_csv", f"returned something other than the {SERIES_CODE} series"
+    if table.rows and not table.observations:
+        return "not_csv", "returned rows this package cannot read, so its format may have changed"
+    return None
+
 def _read_series_body(status: int, body: str) -> list[BankRateObservation]:
     if status != 200:
         message = f"The Bank of England Database answered HTTP {status}{_status_explanation(status)}"
         raise BankRateSourceError("http", message, status)
-    if not body.strip():
-        raise BankRateSourceError("empty", "The Bank of England Database returned an empty response", status)
-    if body.lstrip().startswith("<"):
-        raise BankRateSourceError("not_csv", "The Bank of England Database returned a web page instead of CSV", status)
-    return parse_bank_rate_csv(body)
+    table = read_series_table(body)
+    refused = _refusal_of(table)
+    if refused is not None:
+        raise BankRateSourceError(refused[0], f"The Bank of England Database {refused[1]}", status)
+    return table.observations
 
 # ─── Fetch ───────────────────────────────────────────────────────────────────
 

@@ -16,9 +16,11 @@ from uk_bank_rate import (
     BankRateChange,
     BankRateHistory,
     BankRateObservation,
+    BankRateSourceError,
     PendingDecision,
     date_from_series_date,
     extend_history,
+    fetch_bank_rate_observations,
     history_from_observations,
     is_decision_announced,
     is_decision_reflected,
@@ -101,6 +103,21 @@ def test_readings(case: dict[str, Any]) -> None:
     assert reading.effective_from == _day(expected["effectiveFrom"])
     assert reading.observed_to == _day(expected["observedTo"])
     pending = expected["pendingDecision"]
-    expected_pending = None if pending is None else PendingDecision(date=_day(pending["date"]), announced=pending["announced"])
+    expected_pending = None if pending is None else PendingDecision(
+        date=datetime.date.fromisoformat(pending["date"]), announced=pending["announced"],
+    )
     assert reading.pending_decision == expected_pending
     assert reading.beyond_schedule is expected["beyondSchedule"]
+
+# ─── Answers ─────────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("case", _cases("answers"))
+def test_answers(case: dict[str, Any]) -> None:
+    def transport(url: str, timeout: float) -> tuple[int, str]:
+        return case["status"], case["body"]
+    if "failure" not in case:
+        assert fetch_bank_rate_observations("2026-09-24", "2026-09-25", transport=transport) == _observations(case["expected"])
+        return
+    with pytest.raises(BankRateSourceError) as raised:
+        fetch_bank_rate_observations("2026-09-24", "2026-09-25", transport=transport)
+    assert (raised.value.failure, raised.value.status) == (case["failure"], case["status"])
