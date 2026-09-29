@@ -11,18 +11,20 @@ Two open-source packages, one for npm and one for PyPI, that read the UK Bank Ra
 | `shared/source.json` | The endpoint, series code, series start date and user agent, generated into both packages so neither can drift |
 | `shared/conformance.json` | Test cases both packages must pass. A behaviour change lands here first, then in both implementations |
 | `scripts/sync-shared.mjs` | Writes `shared/` into `typescript/src/generated.ts`, and into `python/src/uk_bank_rate/_generated.py` plus `_generated_history.py` (split so neither passes the 300-line module cap as the history grows), copies `LICENSE` into both packages, and checks every version agrees: both manifests, both lockfile entries and the README badge. `--check` fails on any drift |
-| `scripts/refresh-snapshot.mjs` | Fetches the full series with the built TypeScript package and rewrites `shared/bank-rate-changes.json` |
+| `scripts/refresh-snapshot.mjs` | Fetches the full series with the built TypeScript package and rewrites `shared/bank-rate-changes.json`, refusing to write one that drops or alters a bundled change or ends before the bundled history does |
 | `typescript/` | The npm package: ESM, TypeScript 7 strict, zero runtime dependencies, Vitest |
 | `python/` | The PyPI package: standard library only (`tzdata` on Windows), hatchling, pytest |
 
-The two packages mirror each other module for module: `parse`, `source`, `history`, `schedule`, `reading`, `current`, plus the generated data. **Change one and change the other in the same commit**, with the case in `shared/conformance.json`.
+The two packages mirror each other module for module: `parse`, `source`, `history`, `schedule`, `reading`, `periods`, `current`, plus the generated data. **Change one and change the other in the same commit**, with the case in `shared/conformance.json`.
 
 ## The rules the code encodes
 
 - **A decision is announced at 12:00 London time, and the series lags it.** A decision counts as reflected only when the series carries a row dated on or after the decision day **and** the London clock has passed noon on it. The Bank's help page allows one to two working days for a series to publish; on 17 September 2026 the series still ended on the 16th at 13:40.
-- **An answer is judged by its status and its body, never its headers.** A start date before 2 January 1975 draws a `302` to an error page served as `application/csv`, and the firewall answers some user agents with `403`. Every such case raises `BankRateSourceError` with its `failure`; a rate is never guessed.
+- **An answer is judged by its status and its body, never its headers, and counts only when it is a `200` whose first line names the series and whose rows can be read.** Rows that all fail to read mean the Bank's format changed, so they raise `not_csv` and are never an empty week. The Database redirects with a `302` to an error page served as `application/csv` for a start before 1 January 1963, where it begins (earlier notes said 1975; measured 29 Sep 2026, and `seriesUrl` clamps to the series start, so neither package sends one), for a backwards range, and for a range starting after today, which both packages answer with no observations without asking. The firewall answers some user agents with `403`. Every failure raises `BankRateSourceError` with its `failure`; a rate is never guessed.
+- **Both packages read the CSV by one explicit rule**: a row ends at `\r\n`, `\r` or `\n`, only spaces and tabs are trimmed, and a series date is separated by spaces, tabs or hyphens. Never reach for `\s`, `trim()`, `strip()` or `splitlines()` on the Bank's text: each language defines them differently, and a differential run over the same inputs on 29 Sep 2026 found the two packages disagreeing on 25 of 69 CSV bodies because of exactly that.
 - **Python must send its own user agent.** The firewall refuses `Python-urllib/*` with `403 Access Denied`; `uk-bank-rate (+https://github.com/BV-17/uk-bank-rate)` and Node's default are accepted (measured 28 Sep 2026).
 - **Dates are ISO strings in TypeScript and `datetime.date` in Python; rates are numbers in TypeScript and `Decimal` in Python.** Never format a date for display inside either package.
+- **The bundled data is immutable in both packages**: frozen at load in TypeScript, with readonly public types, and frozen dataclasses of tuples in Python, since every importer in a process shares it.
 - **Unscheduled decisions cannot be flagged**, only picked up once the series carries them, and a date past both the series and the published schedule reads `beyondSchedule: true` rather than settled.
 - **The first bundled change is the series start (2 January 1975)**, not a real change date.
 
@@ -35,6 +37,7 @@ The two packages mirror each other module for module: `parse`, `source`, `histor
 | `typescript/` | `npm test`, `npm run typecheck`, `npm run build` | Suite, strict typecheck, build to `dist/` |
 | `typescript/` | `npm run test:live` | The live checks, including the six-month schedule runway |
 | `python/` | `python -m pytest` | Suite; `pyproject.toml` puts `src/` on the path, so nothing is installed |
+| `python/` | `python -m mypy --strict src` | The strict type check CI and the publish build run, which keeps the `py.typed` promise true |
 | `python/` | `LIVE=1 python -m pytest tests/test_live.py` | The live checks |
 
 ## Keeping it current
@@ -46,7 +49,7 @@ The two packages mirror each other module for module: `parse`, `source`, `histor
 
 Both packages share one version. A release bumps `typescript/package.json` (and `typescript/package-lock.json`, which holds it twice), `python/src/uk_bank_rate/_version.py`, the Version badge in `README.md`, and moves `CHANGELOG.md`'s `[Unreleased]` into a dated heading; then an annotated tag `vX.Y.Z`. `npm run sync:check` fails if any of them disagree.
 
-**Publishing is a public and permanent act, so it happens only on the maintainer's explicit say.** A published version can never be reused. **Both registries publish through `.github/workflows/publish.yml`** by trusted publishing, with no token anywhere: create a GitHub release from the version tag (`gh release create vX.Y.Z`) and the workflow tests and builds both packages, then uploads each from its own environment, `pypi` or `npm`, each of which accepts only `v*` tags, so nothing on `main` can publish. Each build refuses a ref that does not match its own package's version, neither package publishes unless both have built and passed, and the npm job skips a version the registry already holds, so re-running a half-failed release is safe. **The first npm version, 0.2.2, was uploaded by hand**, because npm attaches a trusted publisher only to a package that already exists; it alone carries no provenance attestation, which npm adds automatically to every trusted publish.
+**Publishing is a public and permanent act, so it happens only on the maintainer's explicit say.** A published version can never be reused. **Both registries publish through `.github/workflows/publish.yml`** by trusted publishing, with no token anywhere: create a GitHub release from the version tag (`gh release create vX.Y.Z`) and the workflow tests and builds both packages, then uploads each from its own environment, `pypi` or `npm`, each of which accepts only `v*` tags, so nothing on `main` can publish. Each build refuses a ref that does not match its own package's version, neither package publishes unless both have built and passed, the npm job skips a version the registry already holds, and the PyPI upload skips files it already holds, so re-running a half-failed release is safe. **The first npm version, 0.2.2, was uploaded by hand**, because npm attaches a trusted publisher only to a package that already exists; it alone carries no provenance attestation, which npm adds automatically to every trusted publish.
 
 ## Conventions
 

@@ -18,7 +18,9 @@
 
 **The UK Bank Rate from the Bank of England's own data, for TypeScript and Python, and honest about the hours after a decision.**
 
-Two small packages that answer the same questions the same way: what Bank Rate is today and since when, what it was on any date since 1975, and when the Monetary Policy Committee decides next. The TypeScript package has no dependencies at all and is tested on Node 22, 24 and 26; it uses only web-standard APIs (`fetch`, `AbortSignal`, `Intl`), so Bun, Deno and edge runtimes should work too, though they are not yet tested. The Python package uses the standard library alone (plus `tzdata` on Windows, which ships no time zone database), returns real `date` objects, and gives every rate as a `Decimal`, because interest worked out in floats drifts. Both read the Bank's own published series, both carry a bundled history of every change so historical lookups need no network, and both pass one shared set of test cases, so neither can quietly disagree with the other.
+Two small packages that answer the same questions the same way: what Bank Rate is today and since when, what it was on any date or across any span since 1975, and when the Monetary Policy Committee decides next. Both read the Bank's own published series, both carry a bundled history of every change so historical questions need no network, and both pass one shared set of test cases, so neither can quietly disagree with the other.
+
+The TypeScript package has no dependencies at all and is tested on Node 22, 24 and 26. It uses only web-standard APIs (`fetch`, `AbortSignal`, `Intl`), so Bun, Deno and edge runtimes should work too, though they are not yet tested. The Python package uses the standard library alone (plus `tzdata` on Windows, which ships no time zone database), returns real `date` objects, and gives every rate as a `Decimal`, because interest worked out in floats drifts.
 
 ## Who it is for
 
@@ -28,9 +30,9 @@ Anyone who keeps writing the same fetch against the Bank of England Database: pe
 
 The Committee announces its decision at 12:00 London time, and Bank Rate changes that day. The published series does not. The Bank's own help page says a series can publish one to two working days after the date it covers, and on the afternoon of 17 September 2026 the series still ended on the 16th. A client that simply reads the latest row reports the old rate for that whole window, with nothing to say it might be wrong.
 
-So every reading carries a `pendingDecision`. When it is set, a scheduled decision falls on or before the date you asked about and the published data does not reflect it yet. `announced: true` means the Bank has spoken and the data has not caught up, so the rate you are holding may already be out of date; `announced: false` means the decision is still to come, later today or on a future date. When it is `null`, no scheduled decision stands in the way.
+So every reading carries a `pendingDecision` (`pending_decision` in Python). When it is set, a scheduled decision falls on or before the date you asked about and the published data does not reflect it yet. `announced: true` means the Bank has spoken and the data has not caught up, so the rate you are holding may already be out of date; `announced: false` means the decision is still to come, later today or on a future date. When it is `null`, no scheduled decision stands in the way.
 
-The schedule itself runs out, though: the Bank publishes it a year or so ahead. So every reading also carries `beyondSchedule`, which is `true` when the date you asked about lies past both the published data and the last scheduled decision. Decisions nobody has scheduled yet may have moved the rate by then, so treat such an answer as the last known rate, not a settled one.
+The schedule itself runs out, though: the Bank publishes it a year or so ahead. So every reading also carries `beyondSchedule` (`beyond_schedule`), which is `true` when the date you asked about lies past both the published data and the last scheduled decision. Decisions nobody has scheduled yet may have moved the rate by then, so treat such an answer as the last known rate, not a settled one.
 
 ## TypeScript
 
@@ -42,10 +44,10 @@ npm install uk-bank-rate
 import { bundledHistory, getBankRate, rateOn } from 'uk-bank-rate';
 
 const current = await getBankRate();
-console.log(current);
+console.log(current.rate, current.effectiveFrom, current.nextDecision);
 
-const covidLow = rateOn(bundledHistory, '2020-03-15');
-console.log(covidLow?.rate, covidLow?.effectiveFrom);
+const covidLow = rateOn(bundledHistory, '2020-06-01');
+console.log(covidLow?.rate, covidLow?.effectiveFrom); // 0.1 '2020-03-19'
 ```
 
 `getBankRate()` resolves to an object like this, with every date an ISO string:
@@ -77,11 +79,34 @@ print(current.rate, current.effective_from, current.next_decision)
 if current.pending_decision and current.pending_decision.announced:
     print("A decision was announced today that the published data does not show yet")
 
-covid_low = rate_on(bundled_history, "2020-03-15")
-print(covid_low.rate, covid_low.effective_from)
+covid_low = rate_on(bundled_history, "2020-06-01")
+print(covid_low.rate, covid_low.effective_from)  # 0.1 2020-03-19
 ```
 
-Dates come back as `datetime.date`, rates as `Decimal("3.75")`, and `now` must be timezone-aware, since the package would rather refuse a naive datetime than guess which clock it came from.
+Dates come back as `datetime.date`, rates as `Decimal("3.75")`, and `now` must be a timezone-aware `datetime`, since the package would rather refuse a naive one than guess which clock it came from.
+
+## Rates across a span
+
+Interest at Bank Rate plus a margin "from time to time", as loan agreements put it, needs the rate on every day of a span rather than on one. `ratesBetween` (`rates_between` in Python) splits a span into the periods over which the rate held, each with its first and last day, both inclusive, and its count of days, so the days add up to the span. It works offline on any history:
+
+```python
+from decimal import Decimal
+from uk_bank_rate import bundled_history, rates_between
+
+span = rates_between(bundled_history, "2025-01-01", "2025-12-31")
+interest = sum(Decimal("10000") * (period.rate + 2) / 100 * period.days / 365 for period in span.periods)
+print(round(interest, 2))  # 625.14, at 2% over Bank Rate on £10,000 through 2025
+```
+
+```ts
+import { bundledHistory, ratesBetween } from 'uk-bank-rate';
+
+for (const { start, end, rate, days } of ratesBetween(bundledHistory, '2025-01-01', '2025-12-31')?.periods ?? []) {
+  console.log(start, end, rate, days);
+}
+```
+
+The 2025 span runs from 4.75% on 1 January to 3.75% from 18 December, one period for each rate. The result carries `pendingDecision` and `beyondSchedule` for the span's last day, so a span that runs into the hours after a decision, or past the published schedule, says so; and like `rateOn`, it answers `null` for a span that starts before the history does.
 
 ## What each package offers
 
@@ -89,23 +114,53 @@ Dates come back as `datetime.date`, rates as `Decimal("3.75")`, and `now` must b
 |---|---|---|
 | `getBankRate(options)` | `get_bank_rate(...)` | The rate today, with the day it took effect, the last day observed, any pending decision and the next scheduled one |
 | `rateOn(history, date, now)` | `rate_on(history, on, now)` | The rate in force on a date, from a history you already hold, with no network call |
-| `fetchBankRateHistory(options)` | `fetch_bank_rate_history(...)` | The bundled history brought up to date, fetching only the days since it ends |
-| `fetchBankRateObservations(start, end, options)` | `fetch_bank_rate_observations(start, end, ...)` | The daily series for a range, straight from the Bank |
+| `ratesBetween(history, start, end, now)` | `rates_between(history, start, end, now)` | The periods over which the rate held across a span, each with its days, with no network call |
+| `fetchBankRateHistory(options)` | `fetch_bank_rate_history(...)` | The bundled history, or one you hold, brought up to date by fetching only the days since it ends |
+| `fetchBankRateObservations(start, end, options)` | `fetch_bank_rate_observations(start, end, ...)` | The daily series for a range, straight from the Bank. A range that starts after today has no observations yet, so it is answered without asking |
 | `bundledHistory` | `bundled_history` | Every change since 2 January 1975, as shipped with the release |
+| `historyFromObservations(observations)`, `extendHistory(history, observations)` | `history_from_observations(...)`, `extend_history(...)` | A history built from daily observations, or one extended by newer observations |
 | `SCHEDULED_DECISIONS`, `nextScheduledDecision(now)` | `SCHEDULED_DECISIONS`, `next_scheduled_decision(now)` | The Committee's published decision dates, and the next one |
-| `isDecisionAnnounced(date, now)` | `is_decision_announced(date, now)` | Whether 12:00 London time has passed on a decision day |
-| `BankRateSourceError` | `BankRateSourceError` | Raised with a `failure` of `http`, `not_csv`, `empty`, `timeout` or `network` |
+| `isDecisionAnnounced(date, now)`, `isDecisionReflected(date, observedTo, now)` | `is_decision_announced(...)`, `is_decision_reflected(...)` | Whether 12:00 London time has passed on a decision day, and whether a series ending on `observedTo` shows the decision |
+| `londonDate(now)` | `london_date(now)` | The date in London, which is the day every answer is judged by |
+| `parseBankRateCsv(csv)`, `isoFromSeriesDate(raw)`, `seriesUrl(start, end)` | `parse_bank_rate_csv(...)`, `date_from_series_date(...)`, `series_url(...)` | The pieces the fetch is built from, for reading the Bank's CSV yourself |
+| `SERIES_CODE`, `SERIES_STARTS_ON`, `USER_AGENT` | `SERIES_CODE`, `SERIES_STARTS_ON`, `USER_AGENT` | The series (`IUDBEDR`), the day it begins, and the user agent both packages send |
+| `BankRateSourceError` | `BankRateSourceError` | Raised with a `failure` of `http`, `not_csv`, `empty`, `timeout` or `network`, and the HTTP `status` where there was one |
 
-Pass a history you have cached yourself as `history` and `getBankRate` fetches only the week before it ends onwards. Pass your own `fetch` in TypeScript, or a `transport` callable in Python, to route the request through whatever HTTP client or proxy you already use.
+Everything that reaches the Bank takes the same options: `timeoutMs` in TypeScript or `timeout` in seconds in Python (15 seconds by default), `now` for the clock, and your own `fetch` in TypeScript or `transport` in Python, to route the request through whatever HTTP client or proxy you already use. A Python transport takes the URL and the timeout and returns the status and the body as text. It should not follow redirects, since the Bank reports a bad request by redirecting to an error page, and it should send `USER_AGENT`, since the Bank's firewall refuses Python's default:
+
+```python
+import httpx
+from uk_bank_rate import USER_AGENT, get_bank_rate
+
+def through_httpx(url: str, timeout: float) -> tuple[int, str]:
+    response = httpx.get(url, timeout=timeout, headers={"User-Agent": USER_AGENT})
+    return response.status_code, response.text
+
+current = get_bank_rate(transport=through_httpx)
+```
+
+To keep a history of your own between calls, hold what `fetchBankRateHistory` returns and pass it back as `history`; only the days from a week before it ends are fetched. `getBankRate({ history })` reads from it the same way but does not hand back the extended copy, so a long-running service refreshes with `fetchBankRateHistory` and reads with `rateOn(history, londonDate())`.
 
 ## When the Bank cannot be reached
 
-Nothing guesses. A timeout, a refused connection, a redirect to the Bank's error page, a firewall refusal or a web page served in place of CSV each raise `BankRateSourceError` with its own `failure`, and the rate is never invented. If you would rather fall back than fail, the bundled history answers offline, and its `pendingDecision` still tells you what it cannot know:
+Nothing guesses. A timeout, a refused connection, a redirect to the Bank's error page, a firewall refusal, a web page served in place of CSV, and an answer whose first line does not name the series or whose rows cannot be read each raise `BankRateSourceError` with its own `failure`, and the rate is never invented. A change to the Bank's format is reported as one rather than read as a quiet week. If you would rather fall back than fail, the bundled history answers offline, and its `pendingDecision` still tells you what it cannot know:
 
 ```ts
-import { bundledHistory, londonDate, rateOn } from 'uk-bank-rate';
+import { BankRateSourceError, bundledHistory, getBankRate, londonDate, rateOn } from 'uk-bank-rate';
 
-const offline = rateOn(bundledHistory, londonDate());
+const reading = await getBankRate().catch((error: unknown) => {
+  if (error instanceof BankRateSourceError) return rateOn(bundledHistory, londonDate());
+  throw error;
+});
+```
+
+```python
+from uk_bank_rate import BankRateSourceError, bundled_history, get_bank_rate, london_date, rate_on
+
+try:
+    reading = get_bank_rate()
+except BankRateSourceError:
+    reading = rate_on(bundled_history, london_date())
 ```
 
 ## The data
@@ -113,7 +168,7 @@ const offline = rateOn(bundledHistory, londonDate());
 - **Source**: the Bank of England Database, series `IUDBEDR` (Official Bank Rate), daily from 2 January 1975, through the CSV download the Bank documents on its help page for automatic use.
 - **Bundled history**: every change since 1975 ships inside both packages and is refreshed at each release, so a live call fetches days, not fifty years. Its first entry, 11.5% on 2 January 1975, is where the series begins rather than a change, so a reading from early 1975 gives that date as `effectiveFrom` although the rate was already in force.
 - **Schedule**: the Committee's decision dates for 2026 and 2027, from the Bank's published dates, added a year at a time as the Bank announces them.
-- **Two details learnt the hard way**: the Bank's firewall answers Python's default `urllib` user agent with `403 Access Denied`, so both packages send their own; and a start date before 1975 draws a redirect to an error page that still claims to be CSV, so both packages judge an answer by its status and its body, never by its headers.
+- **Details learnt the hard way**: the Bank's firewall answers Python's default `urllib` user agent with `403 Access Denied`, so both packages send their own. A start date before 1963, when the Database itself begins, and a range that starts after today, each draw a redirect to an error page that still claims to be CSV, so both packages judge an answer by its status and its body, never by its headers, and accept it only when its first line names the series.
 
 ## Limits
 
@@ -138,7 +193,7 @@ uk-bank-rate/
 │   ├── source.json                # the endpoint, series code, start date and user agent
 │   └── conformance.json           # test cases both packages must pass
 ├── scripts/
-│   ├── refresh-snapshot.mjs       # fetches the full series into shared/
+│   ├── refresh-snapshot.mjs       # fetches the full series into shared/, refusing one that loses history
 │   └── sync-shared.mjs            # writes shared/ into both packages, or checks it
 ├── typescript/                    # the npm package
 └── python/                        # the PyPI package
@@ -150,7 +205,7 @@ uk-bank-rate/
 | root | `npm run sync:check` | Fails if a generated module or licence copy has drifted from `shared/`, or any version disagrees |
 | root | `npm run snapshot` | Refreshes the bundled history from the Bank, then syncs |
 | `typescript/` | `npm test`, `npm run typecheck`, `npm run build` | The TypeScript suite, strict typecheck and build |
-| `python/` | `python -m pytest` | The Python suite |
+| `python/` | `python -m pytest`, `python -m mypy --strict src` | The Python suite and strict type check |
 | either | `LIVE=1` with the test command | Runs the checks against the live Database |
 
 Developed by [Bhupen Varsani](https://github.com/BV-17).

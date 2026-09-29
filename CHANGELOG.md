@@ -4,6 +4,26 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+### Added
+
+- `ratesBetween` (`rates_between` in Python) splits a span into the periods over which Bank Rate held, each with its first and last day and its count of days, for interest at Bank Rate plus a margin; it carries the pending decision and the beyond-schedule flag of the span's last day, and works offline on any history
+- `USER_AGENT` is exported from both packages, so a custom Python transport can send the agent the Bank's firewall accepts
+- `now` is accepted by `fetchBankRateObservations` (`fetch_bank_rate_observations`), deciding which day is today for a range that starts after it
+
+### Changed
+
+- A range that starts after today returns no observations without asking the Bank, which answers such a range with a redirect to its error page
+- The TypeScript bundled history and schedule are frozen and the public data types are readonly, so no caller can change them under every other caller in the process, as Python never allowed
+- The workflows use the current GitHub actions, CI and the publish build check the Python types with mypy in strict mode, the PyPI upload skips files it already holds, and the snapshot refresh refuses to write a history that would lose a bundled change
+
+### Fixed
+
+- An answer whose first line does not name the series, or whose rows cannot be read, is refused as `not_csv`; a plain-text notice, a table of another series, or the Bank's rows in a new format had each been read as no observations at all, leaving the rate stale with nothing to say why
+- The two packages now read the Bank's CSV by one rule, a row ending at `\r\n`, `\r` or `\n` and only spaces and tabs trimmed; before, TypeScript accepted Unicode spaces inside a date, and Python split rows on characters TypeScript did not
+- A timeout that is not a positive number is refused before any request; Python had reported a negative one as the Bank being unreachable, and failed on `None`
+- A range that ends before the series begins now says so, rather than naming a start the caller never passed
+- In Python, a `now` that is not a `datetime` raises `TypeError` instead of an `AttributeError`, status 0 is named as a redirect as in TypeScript, and `BankRateSourceError` survives pickling, so it can cross from a worker process
+
 ## [0.2.2] - 2026-09-28
 
 ### Changed
