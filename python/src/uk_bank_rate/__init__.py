@@ -15,6 +15,7 @@ from uk_bank_rate._schedule import (
     next_scheduled_decision,
 )
 from uk_bank_rate._source import BankRateSourceError, fetch_bank_rate_observations, series_url, urllib_transport
+from uk_bank_rate._statutory import late_payment_rate
 from uk_bank_rate._types import (
     BankRateChange,
     BankRateHistory,
@@ -23,6 +24,7 @@ from uk_bank_rate._types import (
     BankRatePeriods,
     BankRateReading,
     CurrentBankRate,
+    LatePaymentRate,
     PendingDecision,
     SourceFailure,
     Transport,
@@ -46,6 +48,7 @@ __all__ = [
     "BankRateReading",
     "BankRateSourceError",
     "CurrentBankRate",
+    "LatePaymentRate",
     "PendingDecision",
     "SourceFailure",
     "Transport",
@@ -58,6 +61,7 @@ __all__ = [
     "history_from_observations",
     "is_decision_announced",
     "is_decision_reflected",
+    "late_payment_rate",
     "london_date",
     "next_scheduled_decision",
     "parse_bank_rate_csv",

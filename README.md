@@ -129,7 +129,31 @@ The 2025 span runs from 4.75% on 1 January to 3.75% from 18 December, one period
 
 TypeScript gives each rate as a plain number, and floats drift, so keep amounts in whole pence or use a decimal library, and round once, at the end.
 
-Statutory interest on a late commercial payment is different. Under the Late Payment of Commercial Debts (Interest) Act 1998 it runs at 8% over the Bank Rate in force on the 30 June or 31 December immediately before the day it starts to run, and stays at that rate for as long as it runs, so it needs `rateOn` for that one day rather than `ratesBetween`.
+## Interest on a late payment
+
+Statutory interest on a late commercial payment does not follow Bank Rate day by day. Under the Late Payment of Commercial Debts (Interest) Act 1998 it runs at 8% over the Bank Rate in force on the 30 June or 31 December immediately before the day it starts to run, and stays at that rate for as long as it runs, so `ratesBetween` is the wrong tool for it. `latePaymentRate` (`late_payment_rate` in Python) gives that rate for the day interest starts to run, with the reference day and the Bank Rate on it:
+
+```python
+from uk_bank_rate import bundled_history, late_payment_rate
+
+# Overdue from 15 March 2025: 8% over the 4.75% in
+# force on 31 December 2024, so 12.75% throughout
+late = late_payment_rate(bundled_history, "2025-03-15")
+if late:
+    print(late.rate, late.reference_date)
+```
+
+```ts
+import {
+  bundledHistory,
+  latePaymentRate,
+} from 'uk-bank-rate';
+
+const late = latePaymentRate(bundledHistory, '2025-03-15');
+console.log(late?.rate, late?.referenceDate);
+```
+
+The result carries `pendingDecision` and `beyondSchedule` for the reference day, so a rate that turns on a decision the data does not show yet says so, and it answers `null` when the history does not reach back that far. A day before 7 August 2002, when the rule came into force, is refused. The same rule holds across the UK: one order sets it for England, Wales and Northern Ireland, and an identical one for Scotland.
 
 ## What each package offers
 
@@ -140,6 +164,7 @@ Every name below is the TypeScript one first and the Python one second, and the 
 - `getBankRate`, `get_bank_rate`: the rate today, with the day it took effect, the last day observed, any pending decision and the next scheduled one.
 - `rateOn`, `rate_on`: the rate in force on a date, from a history you already hold, with no network call.
 - `ratesBetween`, `rates_between`: the periods over which the rate held between two dates, each with its days, with no network call.
+- `latePaymentRate`, `late_payment_rate`: the rate of statutory interest on a late commercial payment, for the day that interest starts to run, with the reference day and the Bank Rate on it.
 
 **Histories**
 

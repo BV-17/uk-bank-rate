@@ -19,6 +19,7 @@ from uk_bank_rate import (
     BankRateObservation,
     BankRatePeriod,
     BankRateSourceError,
+    LatePaymentRate,
     PendingDecision,
     date_from_series_date,
     extend_history,
@@ -26,6 +27,7 @@ from uk_bank_rate import (
     history_from_observations,
     is_decision_announced,
     is_decision_reflected,
+    late_payment_rate,
     london_date,
     next_scheduled_decision,
     parse_bank_rate_csv,
@@ -130,6 +132,25 @@ def test_periods(case: dict[str, Any]) -> None:
     assert span.observed_to == _day(expected["observedTo"])
     assert span.pending_decision == _pending(expected["pendingDecision"])
     assert span.beyond_schedule is expected["beyondSchedule"]
+
+# ─── Late Payment ────────────────────────────────────────────────────────────
+
+@pytest.mark.parametrize("case", _cases("latePaymentRates"))
+def test_late_payment_rates(case: dict[str, Any]) -> None:
+    history, now = _history(case["history"]), _moment(case["now"])
+    if case.get("refused"):
+        with pytest.raises(ValueError, match="came into force"):
+            late_payment_rate(history, case["startsToRun"], now)
+        return
+    expected = case["expected"]
+    assert late_payment_rate(history, case["startsToRun"], now) == (None if expected is None else LatePaymentRate(
+        rate=Decimal(expected["rate"]),
+        reference_date=datetime.date.fromisoformat(expected["referenceDate"]),
+        reference_rate=Decimal(expected["referenceRate"]),
+        observed_to=datetime.date.fromisoformat(expected["observedTo"]),
+        pending_decision=_pending(expected["pendingDecision"]),
+        beyond_schedule=expected["beyondSchedule"],
+    ))
 
 # ─── Answers ─────────────────────────────────────────────────────────────────
 

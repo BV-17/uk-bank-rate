@@ -49,6 +49,15 @@ export interface BankRatePeriods {
   readonly beyondSchedule: boolean;
 }
 
+export interface LatePaymentRate {
+  readonly rate: number;
+  readonly referenceDate: string;
+  readonly referenceRate: number;
+  readonly observedTo: string;
+  readonly pendingDecision: PendingDecision | null;
+  readonly beyondSchedule: boolean;
+}
+
 // ─── Fetching ───────────────────────────────────────────────────────────────
 
 export interface FetchOptions {

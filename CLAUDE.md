@@ -15,7 +15,7 @@ Two open-source packages, one for npm and one for PyPI, that read the UK Bank Ra
 | `typescript/` | The npm package: ESM, TypeScript 7 strict, zero runtime dependencies, Vitest |
 | `python/` | The PyPI package: standard library only (`tzdata` on Windows), hatchling, pytest |
 
-The two packages mirror each other module for module: `parse`, `source`, `history`, `schedule`, `reading`, `periods`, `current`, plus the generated data. **Change one and change the other in the same commit**, with the case in `shared/conformance.json`.
+The two packages mirror each other module for module: `parse`, `source`, `history`, `schedule`, `reading`, `periods`, `statutory`, `current`, plus the generated data. **Change one and change the other in the same commit**, with the case in `shared/conformance.json`.
 
 ## The rules the code encodes
 
@@ -28,6 +28,7 @@ The two packages mirror each other module for module: `parse`, `source`, `histor
 - **The bundled data is immutable in both packages**: frozen at load in TypeScript, with readonly public types, and frozen dataclasses of tuples in Python, since every importer in a process shares it.
 - **Unscheduled decisions cannot be flagged**, only picked up once the series carries them, and a date past both the series and the published schedule reads `beyondSchedule: true` rather than settled.
 - **The first bundled change is the series start (2 January 1975)**, not a real change date.
+- **The late payment rate is fixed by the day interest starts to run.** Article 4 of the Late Payment of Commercial Debts (Rate of Interest) (No. 3) Order 2002 (SI 2002/1675, and the identical Scottish SSI 2002/336) sets 8% over the Bank Rate in force on the 30 June or 31 December immediately before that day, and the rate holds for as long as the interest runs. Both orders came into force on 7 August 2002, so `latePaymentRate` refuses an earlier day rather than apply a rule that did not govern it (read on legislation.gov.uk, 29 Sep 2026).
 
 ## Commands
 

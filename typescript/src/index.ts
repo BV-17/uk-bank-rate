@@ -8,6 +8,7 @@ export { ratesBetween } from './periods.js';
 export { rateOn } from './reading.js';
 export { isDecisionAnnounced, isDecisionReflected, londonDate, nextScheduledDecision } from './schedule.js';
 export { BankRateSourceError, fetchBankRateObservations, seriesUrl } from './source.js';
+export { latePaymentRate } from './statutory.js';
 
 // ─── Public Types ───────────────────────────────────────────────────────────
 
@@ -21,6 +22,7 @@ export type {
   CurrentBankRate,
   CurrentBankRateOptions,
   FetchOptions,
+  LatePaymentRate,
   PendingDecision,
   SourceFailure,
 } from './types.js';

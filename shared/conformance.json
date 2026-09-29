@@ -241,6 +241,99 @@
       "expected": { "periods": [["2027-12-01", "2028-01-31", "3.75", 62]], "observedTo": "2027-12-20", "pendingDecision": null, "beyondSchedule": true }
     }
   ],
+  "latePaymentRates": [
+    {
+      "name": "interest that starts to run in the first half of a year takes the rate in force on the 31 December before",
+      "history": { "changes": [["2024-11-07", "4.75"], ["2025-02-06", "4.5"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-03-15",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12.75", "referenceDate": "2024-12-31", "referenceRate": "4.75", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "interest that starts to run in the second half takes the rate in force on the 30 June before",
+      "history": { "changes": [["2025-05-08", "4.25"], ["2025-08-07", "4"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-09-01",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12.25", "referenceDate": "2025-06-30", "referenceRate": "4.25", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "interest that starts on 1 January takes the rate on the day before",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2026-01-01",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "11.75", "referenceDate": "2025-12-31", "referenceRate": "3.75", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "interest that starts on 30 June still belongs to the first half",
+      "history": { "changes": [["2024-11-07", "4.75"], ["2025-02-06", "4.5"], ["2025-05-08", "4.25"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-06-30",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12.75", "referenceDate": "2024-12-31", "referenceRate": "4.75", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "interest that starts on 1 July takes the rate on the day before",
+      "history": { "changes": [["2025-05-08", "4.25"], ["2025-08-07", "4"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-07-01",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12.25", "referenceDate": "2025-06-30", "referenceRate": "4.25", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "interest that starts on 31 December takes the rate on the 30 June of that year",
+      "history": { "changes": [["2025-05-08", "4.25"], ["2025-08-07", "4"], ["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-12-31",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12.25", "referenceDate": "2025-06-30", "referenceRate": "4.25", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "a change that takes effect on the reference day is the rate in force on it",
+      "history": { "changes": [["2024-08-01", "5"], ["2024-12-31", "4.5"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-01-10",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12.5", "referenceDate": "2024-12-31", "referenceRate": "4.5", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "a rate below one per cent adds up exactly, as the Covid low of 0.1 did",
+      "history": { "changes": [["2020-03-19", "0.1"], ["2021-12-16", "0.25"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2021-02-01",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "8.1", "referenceDate": "2020-12-31", "referenceRate": "0.1", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "a reference day before the history begins has no rate",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2025-11-01",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": null
+    },
+    {
+      "name": "a reference day past the published data carries the decision still to come",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2027-01-10",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "11.75", "referenceDate": "2026-12-31", "referenceRate": "3.75", "observedTo": "2026-09-25", "pendingDecision": {"date": "2026-11-05", "announced": false}, "beyondSchedule": false }
+    },
+    {
+      "name": "a reference day past the schedule as well is only the last known rate",
+      "history": { "changes": [["2025-12-18", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2041-01-10",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "11.75", "referenceDate": "2040-12-31", "referenceRate": "3.75", "observedTo": "2026-09-25", "pendingDecision": {"date": "2026-11-05", "announced": false}, "beyondSchedule": true }
+    },
+    {
+      "name": "interest that starts on 7 August 2002, when the rule came into force, is covered",
+      "history": { "changes": [["2001-11-08", "4"], ["2003-02-06", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2002-08-07",
+      "now": "2026-09-28T09:00:00Z",
+      "expected": { "rate": "12", "referenceDate": "2002-06-30", "referenceRate": "4", "observedTo": "2026-09-25", "pendingDecision": null, "beyondSchedule": false }
+    },
+    {
+      "name": "interest that started to run before 7 August 2002, when the rule came into force, is refused",
+      "history": { "changes": [["2001-11-08", "4"], ["2003-02-06", "3.75"]], "observedTo": "2026-09-25" },
+      "startsToRun": "2002-08-06",
+      "now": "2026-09-28T09:00:00Z",
+      "refused": true
+    }
+  ],
   "answers": [
     {
       "name": "a CSV answer is read, oldest first",

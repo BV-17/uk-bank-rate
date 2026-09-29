@@ -57,6 +57,15 @@ class BankRatePeriods:
     pending_decision: PendingDecision | None
     beyond_schedule: bool
 
+@dataclass(frozen=True, slots=True)
+class LatePaymentRate:
+    rate: Decimal
+    reference_date: datetime.date
+    reference_rate: Decimal
+    observed_to: datetime.date
+    pending_decision: PendingDecision | None
+    beyond_schedule: bool
+
 # ─── Fetching ────────────────────────────────────────────────────────────────
 
 SourceFailure = Literal["http", "not_csv", "empty", "timeout", "network"]

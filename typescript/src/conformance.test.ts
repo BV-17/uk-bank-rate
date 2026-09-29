@@ -14,8 +14,16 @@ import { ratesBetween } from './periods.js';
 import { rateOn } from './reading.js';
 import { isDecisionAnnounced, isDecisionReflected, londonDate, nextScheduledDecision } from './schedule.js';
 import { fetchBankRateObservations } from './source.js';
+import { latePaymentRate } from './statutory.js';
 
-import type { BankRateHistory, BankRateObservation, BankRatePeriods, BankRateReading, SourceFailure } from './types.js';
+import type {
+  BankRateHistory,
+  BankRateObservation,
+  BankRatePeriods,
+  BankRateReading,
+  LatePaymentRate,
+  SourceFailure,
+} from './types.js';
 
 // ─── Case Shapes ────────────────────────────────────────────────────────────
 
@@ -41,6 +49,15 @@ interface PeriodsShape {
   beyondSchedule: boolean;
 }
 
+interface LatePaymentShape {
+  rate: string;
+  referenceDate: string;
+  referenceRate: string;
+  observedTo: string;
+  pendingDecision: { date: string; announced: boolean } | null;
+  beyondSchedule: boolean;
+}
+
 interface NamedCase {
   name: string;
 }
@@ -56,6 +73,7 @@ interface ConformanceCases {
   nextDecisions: (NamedCase & { now: string; expected: string | null })[];
   readings: (NamedCase & { history: HistoryShape; date: string; now: string; expected: ReadingShape | null })[];
   periods: (NamedCase & { history: HistoryShape; start: string; end: string; now: string; expected: PeriodsShape | null })[];
+  latePaymentRates: (NamedCase & { history: HistoryShape; startsToRun: string; now: string; expected?: LatePaymentShape | null; refused?: boolean })[];
   answers: (NamedCase & { status: number; body: string; expected?: Row[]; failure?: SourceFailure })[];
   connectionFailures: (NamedCase & { timeoutMs: number; failsAfterMs: number; failure: SourceFailure })[];
 }
@@ -82,6 +100,9 @@ const periodsFrom = (shape: PeriodsShape | null): BankRatePeriods | null =>
     ...shape,
     periods: shape.periods.map(([start, end, rate, days]) => ({ start, end, rate: Number(rate), days })),
   };
+
+const latePaymentFrom = (shape: LatePaymentShape | null): LatePaymentRate | null =>
+  shape === null ? null : { ...shape, rate: Number(shape.rate), referenceRate: Number(shape.referenceRate) };
 
 const answering = (status: number, body: string): typeof globalThis.fetch => async () => (
   status >= 200 && status <= 599
@@ -163,6 +184,16 @@ describe('readings', () => {
 describe('periods', () => {
   it.each(CASES.periods)('$name', ({ history, start, end, now, expected }) => {
     expect(ratesBetween(historyFrom(history), start, end, new Date(now))).toEqual(periodsFrom(expected));
+  });
+});
+
+// ─── Late Payment ───────────────────────────────────────────────────────────
+
+describe('late payment rates', () => {
+  it.each(CASES.latePaymentRates)('$name', ({ history, startsToRun, now, expected, refused }) => {
+    const reading = () => latePaymentRate(historyFrom(history), startsToRun, new Date(now));
+    if (refused) expect(reading).toThrow(RangeError);
+    else expect(reading()).toEqual(latePaymentFrom(expected ?? null));
   });
 });
 
