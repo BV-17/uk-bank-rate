@@ -6,6 +6,7 @@ import urllib.error
 import urllib.parse
 from collections.abc import Iterator
 from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any
 
 # ─── Third-Party Libraries ───────────────────────────────────────────────────
 
@@ -24,6 +25,14 @@ def _raising(error: BaseException) -> Transport:
     def transport(url: str, timeout: float) -> tuple[int, str]:
         raise error
     return transport
+
+class _Recording:
+    def __init__(self) -> None:
+        self.requests: list[str] = []
+
+    def __call__(self, url: str, timeout: float) -> tuple[int, str]:
+        self.requests.append(url)
+        return 200, "DATE,IUDBEDR\n"
 
 class _LocalDatabase(BaseHTTPRequestHandler):
     user_agents: list[str] = []
@@ -75,6 +84,30 @@ def test_the_url_refuses_bad_dates_and_a_backwards_range() -> None:
         series_url(datetime.datetime(2026, 9, 1, tzinfo=datetime.UTC), "2026-09-28")
     with pytest.raises(ValueError):
         series_url("2026-09-28", "2026-09-01")
+
+def test_the_url_says_when_a_range_ends_before_the_series_begins() -> None:
+    with pytest.raises(ValueError, match="falls before the series starts on 1975-01-02"):
+        series_url("1970-01-01", "1974-12-31")
+
+# ─── Before Asking ───────────────────────────────────────────────────────────
+
+def test_a_range_starting_after_today_asks_nothing() -> None:
+    recording = _Recording()
+    now = datetime.datetime.fromisoformat("2026-09-29T09:00:00Z")
+    assert fetch_bank_rate_observations("2026-10-01", "2026-10-31", now=now, transport=recording) == []
+    assert recording.requests == []
+
+def test_a_range_starting_today_in_london_is_still_asked() -> None:
+    recording = _Recording()
+    fetch_bank_rate_observations("2026-09-30", "2026-09-30", now=datetime.datetime.fromisoformat("2026-09-29T23:30:00Z"), transport=recording)
+    assert len(recording.requests) == 1
+
+@pytest.mark.parametrize("timeout", [0, -1, float("nan"), float("inf"), None])
+def test_a_timeout_that_is_not_a_positive_number_is_refused(timeout: Any) -> None:
+    recording = _Recording()
+    with pytest.raises(ValueError, match="timeout must be a positive number"):
+        fetch_bank_rate_observations("2026-09-24", "2026-09-25", timeout=timeout, transport=recording)
+    assert recording.requests == []
 
 # ─── Answers ─────────────────────────────────────────────────────────────────
 

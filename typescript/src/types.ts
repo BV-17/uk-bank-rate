@@ -41,10 +41,10 @@ export interface FetchOptions {
   fetch?: typeof globalThis.fetch;
   signal?: AbortSignal;
   timeoutMs?: number;
+  now?: Date;
 }
 
 export interface CurrentBankRateOptions extends FetchOptions {
-  now?: Date;
   history?: BankRateHistory;
 }
 

@@ -1,6 +1,7 @@
 # ─── Python Standard Library ─────────────────────────────────────────────────
 
 import datetime
+import math
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -12,6 +13,7 @@ from typing import IO
 from uk_bank_rate._dates import as_date
 from uk_bank_rate._generated import SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT
 from uk_bank_rate._parse import SeriesTable, columns_of, read_series_table
+from uk_bank_rate._schedule import london_date
 from uk_bank_rate._types import BankRateObservation, SourceFailure, Transport
 
 # ─── Constants ───────────────────────────────────────────────────────────────
@@ -34,10 +36,12 @@ def _series_date_parameter(day: datetime.date) -> str:
     return f"{day.day:02d}/{MONTH_ABBREVIATIONS[day.month - 1]}/{day.year}"
 
 def series_url(start: datetime.date | str, end: datetime.date | str) -> str:
-    first_day = max(as_date(start, "start"), SERIES_STARTS_ON)
+    requested = as_date(start, "start")
+    first_day = max(requested, SERIES_STARTS_ON)
     last_day = as_date(end, "end")
     if last_day < first_day:
-        raise ValueError(f"end ({last_day}) falls before start ({first_day})")
+        bound = f"the series starts on {SERIES_STARTS_ON}" if requested < SERIES_STARTS_ON else f"start ({requested})"
+        raise ValueError(f"end ({last_day}) falls before {bound}")
     parameters = {
         "csv.x": "yes",
         "Datefrom": _series_date_parameter(first_day),
@@ -101,14 +105,22 @@ def _read_series_body(status: int, body: str) -> list[BankRateObservation]:
 
 # ─── Fetch ───────────────────────────────────────────────────────────────────
 
+def _check_timeout(timeout: float) -> None:
+    if not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
+        raise ValueError(f"timeout must be a positive number of seconds, received {timeout!r}")
+
 def fetch_bank_rate_observations(
     start: datetime.date | str,
     end: datetime.date | str,
     *,
+    now: datetime.datetime | None = None,
     timeout: float = DEFAULT_TIMEOUT_SECONDS,
     transport: Transport | None = None,
 ) -> list[BankRateObservation]:
     url = series_url(start, end)
+    _check_timeout(timeout)
+    if as_date(start, "start") > london_date(now):
+        return []
     send = transport or urllib_transport
     timed_out = f"The Bank of England Database did not answer within {timeout:g} seconds"
     try:

@@ -3,6 +3,7 @@
 import { assertIsoDate } from './dates.js';
 import { SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT } from './generated.js';
 import { columnsOf, readSeriesTable } from './parse.js';
+import { londonDate } from './schedule.js';
 
 import type { SeriesTable } from './parse.js';
 import type { BankRateObservation, FetchOptions, SourceFailure } from './types.js';
@@ -40,7 +41,10 @@ export const seriesUrl = (start: string, end: string): string => {
   assertIsoDate(start, 'start');
   assertIsoDate(end, 'end');
   const firstDay = start < SERIES_STARTS_ON ? SERIES_STARTS_ON : start;
-  if (end < firstDay) throw new RangeError(`end (${end}) falls before start (${firstDay})`);
+  if (end < firstDay) {
+    const bound = start < SERIES_STARTS_ON ? `the series starts on ${SERIES_STARTS_ON}` : `start (${start})`;
+    throw new RangeError(`end (${end}) falls before ${bound}`);
+  }
   const parameters = new URLSearchParams({
     'csv.x': 'yes',
     Datefrom: seriesDateParameter(firstDay),
@@ -94,6 +98,10 @@ export const fetchBankRateObservations = async (
 ): Promise<BankRateObservation[]> => {
   const url = seriesUrl(start, end);
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
+    throw new RangeError(`timeoutMs must be a positive number of milliseconds, received ${String(timeoutMs)}`);
+  }
+  if (start > londonDate(options.now ?? new Date())) return [];
   const timeout = AbortSignal.timeout(timeoutMs);
   const signal = options.signal ? AbortSignal.any([options.signal, timeout]) : timeout;
   const request = options.fetch ?? globalThis.fetch;

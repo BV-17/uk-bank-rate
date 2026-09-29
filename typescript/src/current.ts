@@ -17,10 +17,11 @@ const OVERLAP_DAYS = 7;
 
 export const fetchBankRateHistory = async (options: CurrentBankRateOptions = {}): Promise<BankRateHistory> => {
   const base = options.history ?? bundledHistory;
-  const today = londonDate(options.now ?? new Date());
+  const now = options.now ?? new Date();
+  const today = londonDate(now);
   const from = base.changes.length === 0 ? SERIES_STARTS_ON : shiftIsoDate(base.observedTo, -OVERLAP_DAYS);
   if (from > today) return base;
-  const recent = await fetchBankRateObservations(from, today, options);
+  const recent = await fetchBankRateObservations(from, today, { ...options, now });
   return extendHistory(base, recent);
 };
 

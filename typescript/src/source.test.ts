@@ -41,6 +41,42 @@ describe('seriesUrl', () => {
     expect(() => seriesUrl('2026-02-30', '2026-09-28')).toThrow(TypeError);
     expect(() => seriesUrl('2026-09-28', '2026-09-01')).toThrow(RangeError);
   });
+
+  it('says when a range ends before the series begins', () => {
+    expect(() => seriesUrl('1970-01-01', '1974-12-31')).toThrow('end (1974-12-31) falls before the series starts on 1975-01-02');
+  });
+});
+
+// ─── Before Asking ──────────────────────────────────────────────────────────
+
+describe('fetchBankRateObservations before it asks', () => {
+  const recording = () => {
+    const requests: string[] = [];
+    const fetch: typeof globalThis.fetch = async (input) => {
+      requests.push(String(input));
+      return new Response('DATE,IUDBEDR\n');
+    };
+    return { fetch, requests };
+  };
+
+  it('asks nothing for a range that starts after today, which the Bank answers with its error page', async () => {
+    const { fetch, requests } = recording();
+    const now = new Date('2026-09-29T09:00:00Z');
+    await expect(fetchBankRateObservations('2026-10-01', '2026-10-31', { fetch, now })).resolves.toEqual([]);
+    expect(requests).toHaveLength(0);
+  });
+
+  it('still asks for a range that starts today in London', async () => {
+    const { fetch, requests } = recording();
+    await fetchBankRateObservations('2026-09-30', '2026-09-30', { fetch, now: new Date('2026-09-29T23:30:00Z') });
+    expect(requests).toHaveLength(1);
+  });
+
+  it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])('refuses a timeout of %s ms', async (timeoutMs) => {
+    const { fetch, requests } = recording();
+    await expect(fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch, timeoutMs })).rejects.toThrow(RangeError);
+    expect(requests).toHaveLength(0);
+  });
 });
 
 // ─── Answers ────────────────────────────────────────────────────────────────

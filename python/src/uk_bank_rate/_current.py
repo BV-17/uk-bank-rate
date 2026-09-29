@@ -27,11 +27,12 @@ def fetch_bank_rate_history(
     transport: Transport | None = None,
 ) -> BankRateHistory:
     base = bundled_history if history is None else history
-    today = london_date(now)
+    moment = as_aware(now)
+    today = london_date(moment)
     start = base.observed_to - OVERLAP if base.changes else SERIES_STARTS_ON
     if start > today:
         return base
-    recent = fetch_bank_rate_observations(start, today, timeout=timeout, transport=transport)
+    recent = fetch_bank_rate_observations(start, today, now=moment, timeout=timeout, transport=transport)
     return extend_history(base, recent)
 
 # ─── Current Rate ────────────────────────────────────────────────────────────
