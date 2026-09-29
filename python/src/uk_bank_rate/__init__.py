@@ -2,7 +2,7 @@
 
 from uk_bank_rate._bundled import bundled_history
 from uk_bank_rate._current import fetch_bank_rate_history, get_bank_rate
-from uk_bank_rate._generated import SERIES_CODE, SERIES_STARTS_ON
+from uk_bank_rate._generated import SERIES_CODE, SERIES_STARTS_ON, USER_AGENT
 from uk_bank_rate._history import extend_history, history_from_observations
 from uk_bank_rate._parse import date_from_series_date, parse_bank_rate_csv
 from uk_bank_rate._periods import rates_between
@@ -37,6 +37,7 @@ __all__ = [
     "SCHEDULED_DECISIONS",
     "SERIES_CODE",
     "SERIES_STARTS_ON",
+    "USER_AGENT",
     "BankRateChange",
     "BankRateHistory",
     "BankRateObservation",

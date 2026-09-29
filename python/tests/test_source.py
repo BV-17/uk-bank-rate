@@ -15,7 +15,7 @@ import pytest
 
 # ─── Local Application Imports ───────────────────────────────────────────────
 
-from uk_bank_rate import BankRateSourceError, Transport, fetch_bank_rate_observations, series_url, urllib_transport
+from uk_bank_rate import USER_AGENT, BankRateSourceError, Transport, fetch_bank_rate_observations, series_url, urllib_transport
 
 # ─── Fakes ───────────────────────────────────────────────────────────────────
 
@@ -160,7 +160,8 @@ def test_a_failed_connection_names_its_failure(error: BaseException, failure: st
 def test_the_default_transport_names_itself_and_reads_the_answer(local_database: str) -> None:
     status, body = urllib_transport(f"{local_database}/csv", 5)
     assert (status, body) == (200, "DATE,IUDBEDR\n25 Sep 2026,3.75\n")
-    assert _LocalDatabase.user_agents[-1].startswith("uk-bank-rate ")
+    assert _LocalDatabase.user_agents[-1] == USER_AGENT
+    assert USER_AGENT.startswith("uk-bank-rate ")
 
 def test_the_default_transport_refuses_to_follow_a_redirect(local_database: str) -> None:
     status, body = urllib_transport(f"{local_database}/redirect", 5)

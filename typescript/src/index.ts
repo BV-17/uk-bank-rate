@@ -1,7 +1,7 @@
 // ─── Public Interface ───────────────────────────────────────────────────────
 
 export { fetchBankRateHistory, getBankRate } from './current.js';
-export { SCHEDULED_DECISIONS, SERIES_CODE, SERIES_STARTS_ON, bundledHistory } from './generated.js';
+export { SCHEDULED_DECISIONS, SERIES_CODE, SERIES_STARTS_ON, USER_AGENT, bundledHistory } from './generated.js';
 export { extendHistory, historyFromObservations } from './history.js';
 export { isoFromSeriesDate, parseBankRateCsv } from './parse.js';
 export { ratesBetween } from './periods.js';

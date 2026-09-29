@@ -4,6 +4,7 @@ import { describe, expect, it } from 'vitest';
 
 // ─── Local Application Imports ──────────────────────────────────────────────
 
+import { USER_AGENT } from './generated.js';
 import { fetchBankRateObservations, seriesUrl } from './source.js';
 
 // ─── Fakes ──────────────────────────────────────────────────────────────────
@@ -139,6 +140,7 @@ describe('fetchBankRateObservations on a bad connection', () => {
     };
     await fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch: recording });
     expect(seen?.redirect).toBe('manual');
-    expect(new Headers(seen?.headers).get('user-agent')).toMatch(/^uk-bank-rate /);
+    expect(new Headers(seen?.headers).get('user-agent')).toBe(USER_AGENT);
+    expect(USER_AGENT).toMatch(/^uk-bank-rate /);
   });
 });
