@@ -1,6 +1,7 @@
 # ─── Python Standard Library ─────────────────────────────────────────────────
 
 import datetime
+import pickle
 import threading
 import urllib.error
 import urllib.parse
@@ -128,6 +129,13 @@ def test_a_refusal_says_what_went_wrong(status: int, body: str, failure: str, wo
         fetch_bank_rate_observations("2026-09-24", "2026-09-25", transport=_answering(body, status))
     assert raised.value.failure == failure
     assert raised.value.status == status
+
+# ─── Errors ──────────────────────────────────────────────────────────────────
+
+def test_a_source_error_survives_pickling_so_it_can_cross_processes() -> None:
+    error = BankRateSourceError("http", "The Bank of England Database answered HTTP 302", 302)
+    restored = pickle.loads(pickle.dumps(error))
+    assert (type(restored), restored.failure, str(restored), restored.status) == (BankRateSourceError, "http", str(error), 302)
 
 # ─── Failures on the Way ─────────────────────────────────────────────────────
 

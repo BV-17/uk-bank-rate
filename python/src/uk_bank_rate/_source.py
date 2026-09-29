@@ -30,6 +30,9 @@ class BankRateSourceError(Exception):
         self.failure: SourceFailure = failure
         self.status = status
 
+    def __reduce__(self) -> tuple[type["BankRateSourceError"], tuple[SourceFailure, str, int | None]]:
+        return type(self), (self.failure, str(self), self.status)
+
 # ─── Request ─────────────────────────────────────────────────────────────────
 
 def _series_date_parameter(day: datetime.date) -> str:

@@ -3,6 +3,7 @@
 import datetime
 import urllib.parse
 from decimal import Decimal
+from typing import Any
 
 # ─── Third-Party Libraries ───────────────────────────────────────────────────
 
@@ -94,3 +95,8 @@ def test_no_rate_is_invented_when_nothing_is_known_for_today() -> None:
 def test_a_naive_now_is_refused_rather_than_guessed() -> None:
     with pytest.raises(ValueError, match="timezone-aware"):
         get_bank_rate(transport=_Serving("DATE,IUDBEDR\n"), now=datetime.datetime(2026, 9, 28, 9, 0))
+
+def test_a_date_passed_as_now_is_refused_as_the_wrong_type() -> None:
+    today: Any = datetime.date(2026, 9, 28)
+    with pytest.raises(TypeError, match="timezone-aware datetime, not date"):
+        get_bank_rate(transport=_Serving("DATE,IUDBEDR\n"), now=today)

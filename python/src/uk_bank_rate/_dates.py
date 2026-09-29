@@ -24,6 +24,8 @@ def as_date(value: datetime.date | str, name: str) -> datetime.date:
 def as_aware(now: datetime.datetime | None) -> datetime.datetime:
     if now is None:
         return datetime.datetime.now(datetime.UTC)
+    if not isinstance(now, datetime.datetime):
+        raise TypeError(f"now must be a timezone-aware datetime, not {type(now).__name__}")
     if now.tzinfo is None or now.utcoffset() is None:
         raise ValueError("now must be timezone-aware, for example datetime.now(timezone.utc)")
     return now
