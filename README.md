@@ -91,7 +91,8 @@ if pending and pending.announced:
 
 # The Covid low: 0.1, in force from 2020-03-19
 covid_low = rate_on(bundled_history, "2020-06-01")
-print(covid_low.rate, covid_low.effective_from)
+if covid_low:
+    print(covid_low.rate, covid_low.effective_from)
 ```
 
 Dates come back as `datetime.date`, rates as `Decimal("3.75")`, and `now` must be a timezone-aware `datetime`, since the package would rather refuse a naive one than guess which clock it came from.
@@ -108,11 +109,12 @@ from uk_bank_rate import bundled_history, rates_between
 principal, margin = Decimal("10000"), 2
 start, end = "2025-01-01", "2025-12-31"
 span = rates_between(bundled_history, start, end)
-interest = sum(
-    principal * (period.rate + margin) * period.days
-    for period in span.periods
-) / 100 / 365
-print(round(interest, 2))  # 625.14
+if span:
+    interest = sum(
+        principal * (period.rate + margin) * period.days
+        for period in span.periods
+    ) / 100 / 365
+    print(round(interest, 2))  # 625.14
 ```
 
 ```ts
@@ -124,6 +126,10 @@ console.table(span?.periods);
 ```
 
 The 2025 span runs from 4.75% on 1 January to 3.75% from 18 December, one period for each rate. The result carries `pendingDecision` and `beyondSchedule` for the span's last day, so a span that runs into the hours after a decision, or past the published schedule, says so; and like `rateOn`, it answers `null` for a span that starts before the history does.
+
+TypeScript gives each rate as a plain number, and floats drift, so keep amounts in whole pence or use a decimal library, and round once, at the end.
+
+Statutory interest on a late commercial payment is different. Under the Late Payment of Commercial Debts (Interest) Act 1998 it runs at 8% over the Bank Rate in force on the 30 June or 31 December immediately before the day it starts to run, and stays at that rate for as long as it runs, so it needs `rateOn` for that one day rather than `ratesBetween`.
 
 ## What each package offers
 
@@ -179,10 +185,11 @@ To keep a history of your own between calls, hold what `fetchBankRateHistory` re
 
 ## When the Bank cannot be reached
 
-Nothing guesses. A timeout, a refused connection, a redirect to the Bank's error page, a firewall refusal, a web page served in place of CSV, and an answer whose first line does not name the series or whose rows cannot be read each raise `BankRateSourceError` with its own `failure`, and the rate is never invented. A change to the Bank's format is reported as one rather than read as a quiet week. If you would rather fall back than fail, the bundled history answers offline, and its `pendingDecision` still tells you what it cannot know:
+Nothing guesses. A timeout, a refused connection, a redirect to the Bank's error page, a firewall refusal, a web page served in place of CSV, and an answer whose first line does not name the series or whose rows cannot be read each raise `BankRateSourceError` with its own `failure`, and the rate is never invented. A change to the Bank's format is reported as one rather than read as a quiet week. If you would rather fall back than fail, the bundled history answers offline, and its `pendingDecision` still tells you what it cannot know. The fallback is a plain reading, without the `asOf` and `nextDecision` that `getBankRate` adds, and `rateOn` answers `null` (`None` in Python) for a date before the history, so declare the variable to match:
 
 ```ts
 import {
+  type BankRateReading,
   BankRateSourceError,
   bundledHistory,
   getBankRate,
@@ -190,7 +197,7 @@ import {
   rateOn,
 } from 'uk-bank-rate';
 
-let reading;
+let reading: BankRateReading | null;
 try {
   reading = await getBankRate();
 } catch (error) {
@@ -201,6 +208,7 @@ try {
 
 ```python
 from uk_bank_rate import (
+    BankRateReading,
     BankRateSourceError,
     bundled_history,
     get_bank_rate,
@@ -208,6 +216,7 @@ from uk_bank_rate import (
     rate_on,
 )
 
+reading: BankRateReading | None
 try:
     reading = get_bank_rate()
 except BankRateSourceError:
