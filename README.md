@@ -239,15 +239,15 @@ The repository holds both packages and the files they share:
 ```
 uk-bank-rate/
 ├── shared/
-│   ├── bank-rate-changes.json     # every change since 1975, refreshed from the Bank
-│   ├── scheduled-decisions.json   # the Committee's published decision dates
-│   ├── source.json                # the endpoint, series code, start date and user agent
-│   └── conformance.json           # test cases both packages must pass
+│   ├── bank-rate-changes.json    # every change since 1975
+│   ├── scheduled-decisions.json  # the Committee's dates
+│   ├── source.json               # where and what to fetch
+│   └── conformance.json          # cases both packages pass
 ├── scripts/
-│   ├── refresh-snapshot.mjs       # fetches the full series into shared/, refusing one that loses history
-│   └── sync-shared.mjs            # writes shared/ into both packages, or checks it
-├── typescript/                    # the npm package
-└── python/                        # the PyPI package
+│   ├── refresh-snapshot.mjs      # refreshes the history
+│   └── sync-shared.mjs           # writes shared/ into both
+├── typescript/                   # the npm package
+└── python/                       # the PyPI package
 ```
 
 | Where | Command | What it does |
