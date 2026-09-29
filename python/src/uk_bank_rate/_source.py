@@ -2,6 +2,7 @@
 
 import datetime
 import math
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -112,6 +113,16 @@ def _check_timeout(timeout: float) -> None:
     if not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:
         raise ValueError(f"timeout must be a positive number of seconds, received {timeout!r}")
 
+def _counts_as_timeout(error: Exception, started: float, timeout: float) -> bool:
+    if isinstance(error, TimeoutError):
+        return True
+    if isinstance(error, urllib.error.URLError) and isinstance(error.reason, TimeoutError):
+        return True
+    return time.monotonic() - started >= timeout
+
+def _reason_of(error: Exception) -> object:
+    return error.reason if isinstance(error, urllib.error.URLError) else error
+
 def fetch_bank_rate_observations(
     start: datetime.date | str,
     end: datetime.date | str,
@@ -126,14 +137,11 @@ def fetch_bank_rate_observations(
         return []
     send = transport or urllib_transport
     timed_out = f"The Bank of England Database did not answer within {timeout:g} seconds"
+    started = time.monotonic()
     try:
         status, body = send(url, timeout)
-    except TimeoutError as error:
-        raise BankRateSourceError("timeout", timed_out) from error
-    except urllib.error.URLError as error:
-        if isinstance(error.reason, TimeoutError):
-            raise BankRateSourceError("timeout", timed_out) from error
-        raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {error.reason}") from error
     except Exception as error:
-        raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {error}") from error
+        if _counts_as_timeout(error, started, timeout):
+            raise BankRateSourceError("timeout", timed_out) from error
+        raise BankRateSourceError("network", f"Could not reach the Bank of England Database: {_reason_of(error)}") from error
     return _read_series_body(status, body)

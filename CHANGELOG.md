@@ -4,6 +4,10 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+### Fixed
+
+- In Python, whatever a custom transport raises once the timeout has passed is reported as `timeout`, as TypeScript reports it; a transport built on httpx or requests raises its client's own timeout type, which had been reported as `network`
+
 ## [0.3.0] - 2026-09-29
 
 ### Added

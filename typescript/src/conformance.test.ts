@@ -57,6 +57,7 @@ interface ConformanceCases {
   readings: (NamedCase & { history: HistoryShape; date: string; now: string; expected: ReadingShape | null })[];
   periods: (NamedCase & { history: HistoryShape; start: string; end: string; now: string; expected: PeriodsShape | null })[];
   answers: (NamedCase & { status: number; body: string; expected?: Row[]; failure?: SourceFailure })[];
+  connectionFailures: (NamedCase & { timeoutMs: number; failsAfterMs: number; failure: SourceFailure })[];
 }
 
 // ─── Shared Cases ───────────────────────────────────────────────────────────
@@ -87,6 +88,13 @@ const answering = (status: number, body: string): typeof globalThis.fetch => asy
     ? new Response(body, { status })
     : Object.defineProperty(new Response(body), 'status', { value: status })
 );
+
+class ClientTimeout extends Error {}
+
+const failingAfter = (delayMs: number): typeof globalThis.fetch => async () => {
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
+  throw new ClientTimeout('the client gave up');
+};
 
 // ─── Parsing ────────────────────────────────────────────────────────────────
 
@@ -165,5 +173,14 @@ describe('answers from the Database', () => {
     const attempt = fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch: answering(status, body) });
     if (failure) await expect(attempt).rejects.toMatchObject({ failure, status });
     else await expect(attempt).resolves.toEqual(observationsFrom(expected ?? []));
+  });
+});
+
+// ─── Failures on the Way ────────────────────────────────────────────────────
+
+describe('failures on the way to the Database', () => {
+  it.each(CASES.connectionFailures)('$name', async ({ timeoutMs, failsAfterMs, failure }) => {
+    const attempt = fetchBankRateObservations('2026-09-24', '2026-09-25', { fetch: failingAfter(failsAfterMs), timeoutMs });
+    await expect(attempt).rejects.toMatchObject({ failure, cause: expect.any(ClientTimeout) });
   });
 });

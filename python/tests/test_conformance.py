@@ -2,6 +2,7 @@
 
 import datetime
 import json
+import time
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -142,3 +143,18 @@ def test_answers(case: dict[str, Any]) -> None:
     with pytest.raises(BankRateSourceError) as raised:
         fetch_bank_rate_observations("2026-09-24", "2026-09-25", transport=transport)
     assert (raised.value.failure, raised.value.status) == (case["failure"], case["status"])
+
+# ─── Failures on the Way ─────────────────────────────────────────────────────
+
+class _ClientTimeout(Exception):
+    pass
+
+@pytest.mark.parametrize("case", _cases("connectionFailures"))
+def test_connection_failures(case: dict[str, Any]) -> None:
+    def transport(url: str, timeout: float) -> tuple[int, str]:
+        time.sleep(case["failsAfterMs"] / 1000)
+        raise _ClientTimeout("the client gave up")
+    with pytest.raises(BankRateSourceError) as raised:
+        fetch_bank_rate_observations("2026-09-24", "2026-09-25", timeout=case["timeoutMs"] / 1000, transport=transport)
+    assert raised.value.failure == case["failure"]
+    assert isinstance(raised.value.__cause__, _ClientTimeout)

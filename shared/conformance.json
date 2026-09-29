@@ -281,5 +281,19 @@
       "body": "DATE,IUDBEDR\r\n2026-09-24,3.75\r\n2026-09-25,3.75\r\n",
       "failure": "not_csv"
     }
+  ],
+  "connectionFailures": [
+    {
+      "name": "a client's own error once the timeout has passed is a timeout",
+      "timeoutMs": 20,
+      "failsAfterMs": 80,
+      "failure": "timeout"
+    },
+    {
+      "name": "a client's own error before the timeout is a network failure",
+      "timeoutMs": 5000,
+      "failsAfterMs": 0,
+      "failure": "network"
+    }
   ]
 }

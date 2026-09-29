@@ -160,7 +160,7 @@ Every name below is the TypeScript one first and the Python one second, and the 
 - `SERIES_CODE`, `SERIES_STARTS_ON`, `USER_AGENT`: the series (`IUDBEDR`), the day it begins, and the user agent both packages send.
 - `BankRateSourceError`: raised with a `failure` of `http`, `not_csv`, `empty`, `timeout` or `network`, and the HTTP `status` where there was one.
 
-Everything that reaches the Bank takes the same options: `timeoutMs` in TypeScript or `timeout` in seconds in Python (15 seconds by default), `now` for the clock, and your own `fetch` in TypeScript or `transport` in Python, to route the request through whatever HTTP client or proxy you already use. A Python transport takes the URL and the timeout and returns the status and the body as text. It should not follow redirects, since the Bank reports a bad request by redirecting to an error page, and it should send `USER_AGENT`, since the Bank's firewall refuses Python's default:
+Everything that reaches the Bank takes the same options: `timeoutMs` in TypeScript or `timeout` in seconds in Python (15 seconds by default), `now` for the clock, and your own `fetch` in TypeScript or `transport` in Python, to route the request through whatever HTTP client or proxy you already use. A Python transport takes the URL and the timeout and returns the status and the body as text; whatever it raises once the timeout has passed is reported as a `timeout`. It should not follow redirects, since the Bank reports a bad request by redirecting to an error page, and it should send `USER_AGENT`, since the Bank's firewall refuses Python's default:
 
 ```python
 import httpx
