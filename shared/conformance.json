@@ -11,7 +11,11 @@
     { "input": "31 Feb 2026", "expected": null },
     { "input": "DATE", "expected": null },
     { "input": "5 Smarch 2026", "expected": null },
-    { "input": "2026-08-05", "expected": null }
+    { "input": "2026-08-05", "expected": null },
+    { "input": " 18 Dec 2025\t", "expected": "2025-12-18" },
+    { "input": "18\tDec\t2025", "expected": "2025-12-18" },
+    { "input": "18\u00a0Dec\u00a02025", "expected": null },
+    { "input": "\u001c18 Dec 2025", "expected": null }
   ],
   "csv": [
     {
@@ -21,8 +25,18 @@
     },
     {
       "name": "tab separators, Windows line endings and a byte order mark are read",
-      "input": "﻿DATE\tIUDBEDR\r\n18 Dec 2025\t3.75\r\n",
+      "input": "\ufeffDATE\tIUDBEDR\r\n18 Dec 2025\t3.75\r\n",
       "expected": [["2025-12-18", "3.75"]]
+    },
+    {
+      "name": "a lone carriage return ends a row, as in a classic Mac file",
+      "input": "DATE,IUDBEDR\r18 Dec 2025,3.75\r19 Dec 2025,3.5\r",
+      "expected": [["2025-12-18", "3.75"], ["2025-12-19", "3.5"]]
+    },
+    {
+      "name": "only spaces and tabs are trimmed, and no other character ends a row",
+      "input": "DATE,IUDBEDR\n18 Dec 2025,\u00a03.75\n19 Dec 2025,3.5\u000b20 Dec 2025,3.5\n21 Dec 2025 , 3.5 \n",
+      "expected": [["2025-12-21", "3.5"]]
     },
     {
       "name": "the older fractional rates keep their precision",

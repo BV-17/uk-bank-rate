@@ -11,11 +11,21 @@ const MONTH_NUMBERS: Readonly<Record<string, string>> = {
   jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12',
 };
 
-const SERIES_DATE = /^(\d{1,2})[\s-]+([A-Za-z]{3})[\s-]+(\d{4}|\d{2})$/;
+const SERIES_DATE = /^(\d{1,2})[ \t-]+([A-Za-z]{3})[ \t-]+(\d{4}|\d{2})$/;
 
 const RATE_VALUE = /^-?\d+(?:\.\d+)?$/;
 
-const BYTE_ORDER_MARK = /^﻿/;
+const BYTE_ORDER_MARK = /^\uFEFF/;
+
+const LINE_BREAK = /\r\n|\r|\n/;
+
+const FIELD_SEPARATOR = /[\t,]/;
+
+const EDGE_BLANKS = /^[ \t]+|[ \t]+$/g;
+
+// ─── Text ───────────────────────────────────────────────────────────────────
+
+const trimmed = (text: string): string => text.replace(EDGE_BLANKS, '');
 
 // ─── Dates ──────────────────────────────────────────────────────────────────
 
@@ -26,7 +36,7 @@ const fullYear = (digits: string): number => {
 };
 
 export const isoFromSeriesDate = (raw: string): string | null => {
-  const match = SERIES_DATE.exec(raw.trim());
+  const match = SERIES_DATE.exec(trimmed(raw));
   if (!match) return null;
   const [, dayDigits = '', monthName = '', yearDigits = ''] = match;
   const month = MONTH_NUMBERS[monthName.toLowerCase()];
@@ -40,17 +50,17 @@ export const isoFromSeriesDate = (raw: string): string | null => {
 // ─── CSV ────────────────────────────────────────────────────────────────────
 
 const observationFrom = (line: string): BankRateObservation | null => {
-  const [dateField = '', rateField = ''] = line.split(/[\t,]/);
+  const [dateField = '', rateField = ''] = line.split(FIELD_SEPARATOR);
   const date = isoFromSeriesDate(dateField);
-  const rateText = rateField.trim();
+  const rateText = trimmed(rateField);
   if (date === null || !RATE_VALUE.test(rateText)) return null;
   return { date, rate: Number(rateText) };
 };
 
 export const parseBankRateCsv = (csv: string): BankRateObservation[] => {
   const observations: BankRateObservation[] = [];
-  for (const line of csv.replace(BYTE_ORDER_MARK, '').split(/\r?\n/)) {
-    const observation = observationFrom(line.trim());
+  for (const line of csv.replace(BYTE_ORDER_MARK, '').split(LINE_BREAK)) {
+    const observation = observationFrom(trimmed(line));
     if (observation) observations.push(observation);
   }
   return observations.sort((left, right) => left.date.localeCompare(right.date));
