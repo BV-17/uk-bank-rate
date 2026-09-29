@@ -4,6 +4,12 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-09-29
+
+### Changed
+
+- The TypeScript package is unchanged apart from its version, and the bundled history in both packages still runs to 28 September 2026
+
 ### Fixed
 
 - In Python, whatever a custom transport raises once the timeout has passed is reported as `timeout`, as TypeScript reports it; a transport built on httpx or requests raises its client's own timeout type, which had been reported as `network`
