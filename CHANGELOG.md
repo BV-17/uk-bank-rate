@@ -4,6 +4,8 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-29
+
 ### Added
 
 - `latePaymentRate` (`late_payment_rate` in Python) gives the rate of statutory interest on a late commercial payment under the Late Payment of Commercial Debts (Interest) Act 1998: 8% over the Bank Rate in force on the 30 June or 31 December immediately before the day interest starts to run, with that reference day and its rate, and the pending decision and beyond-schedule flags of the reference day; it refuses a day before 7 August 2002, when the rule came into force, and answers `null` when the history does not reach back to the reference day
