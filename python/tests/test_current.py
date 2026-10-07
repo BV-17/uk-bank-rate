@@ -79,7 +79,7 @@ def test_a_decision_announced_this_afternoon_is_flagged_until_the_series_catches
 
 def test_the_bundled_history_is_the_starting_point_when_none_is_given() -> None:
     serving = _Serving("DATE,IUDBEDR\n")
-    current = get_bank_rate(transport=serving, now=_at("2026-09-28T09:00:00Z"))
+    current = get_bank_rate(transport=serving, now=_at(f"{bundled_history.observed_to.isoformat()}T09:00:00Z"))
     assert current.observed_to == bundled_history.observed_to
     assert len(serving.requests) == 1
 

@@ -72,7 +72,7 @@ describe('getBankRate', () => {
 
   it('starts from the bundled history when given none', async () => {
     const { fetch, requests } = serving('DATE,IUDBEDR\n');
-    const current = await getBankRate({ fetch, now: new Date('2026-09-28T09:00:00Z') });
+    const current = await getBankRate({ fetch, now: new Date(`${bundledHistory.observedTo}T09:00:00Z`) });
     expect(current.observedTo).toBe(bundledHistory.observedTo);
     expect(requests).toHaveLength(1);
   });
