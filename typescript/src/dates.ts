@@ -1,4 +1,4 @@
-// ─── Validation ─────────────────────────────────────────────────────────────
+// ─── Validation ────────────────────────────────────────────────────────────
 
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -16,7 +16,7 @@ export const assertIsoDate = (value: string, name: string): void => {
   }
 };
 
-// ─── Arithmetic ─────────────────────────────────────────────────────────────
+// ─── Arithmetic ────────────────────────────────────────────────────────────
 
 export const shiftIsoDate = (isoDate: string, days: number): string => {
   const shifted = new Date(`${isoDate}T00:00:00Z`);

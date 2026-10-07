@@ -1,15 +1,15 @@
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { getBankRate } from './current.js';
 import { bundledHistory } from './generated.js';
 
 import type { BankRateHistory } from './types.js';
 
-// ─── Fixtures ───────────────────────────────────────────────────────────────
+// ─── Fixtures ──────────────────────────────────────────────────────────────
 
 const history: BankRateHistory = {
   changes: [{ date: '2025-08-07', rate: 4 }, { date: '2025-12-18', rate: 3.75 }],
@@ -25,7 +25,7 @@ const serving = (csv: string) => {
   return { fetch, requests };
 };
 
-// ─── Current Rate ───────────────────────────────────────────────────────────
+// ─── Current Rate ──────────────────────────────────────────────────────────
 
 describe('getBankRate', () => {
   it('fetches only the days after its history, with a week of overlap', async () => {

@@ -1,4 +1,4 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 from collections.abc import Callable
@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from decimal import Decimal
 from typing import Literal
 
-# ─── Series ──────────────────────────────────────────────────────────────────
+# ─── Series ─────────────────────────────────────────────────────────────────
 
 @dataclass(frozen=True, slots=True)
 class BankRateObservation:
@@ -23,7 +23,7 @@ class BankRateHistory:
     changes: tuple[BankRateChange, ...]
     observed_to: datetime.date
 
-# ─── Readings ────────────────────────────────────────────────────────────────
+# ─── Readings ───────────────────────────────────────────────────────────────
 
 @dataclass(frozen=True, slots=True)
 class PendingDecision:
@@ -66,7 +66,7 @@ class LatePaymentRate:
     pending_decision: PendingDecision | None
     beyond_schedule: bool
 
-# ─── Fetching ────────────────────────────────────────────────────────────────
+# ─── Fetching ───────────────────────────────────────────────────────────────
 
 SourceFailure = Literal["http", "not_csv", "empty", "timeout", "network"]
 

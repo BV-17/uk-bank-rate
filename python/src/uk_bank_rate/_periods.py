@@ -1,19 +1,19 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._dates import as_aware, as_date
 from uk_bank_rate._history import change_in_force
 from uk_bank_rate._reading import is_beyond_schedule, pending_decision_by
 from uk_bank_rate._types import BankRateChange, BankRateHistory, BankRatePeriod, BankRatePeriods
 
-# ─── Constants ───────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 
 ONE_DAY = datetime.timedelta(days=1)
 
-# ─── Periods ─────────────────────────────────────────────────────────────────
+# ─── Periods ────────────────────────────────────────────────────────────────
 
 def _periods_of(changes: list[BankRateChange], end: datetime.date) -> tuple[BankRatePeriod, ...]:
     lasts = [following.date - ONE_DAY for following in changes[1:]] + [end]

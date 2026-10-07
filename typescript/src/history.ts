@@ -1,8 +1,8 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import type { BankRateChange, BankRateHistory, BankRateObservation } from './types.js';
 
-// ─── Ordering ───────────────────────────────────────────────────────────────
+// ─── Ordering ──────────────────────────────────────────────────────────────
 
 const byDate = (observations: readonly BankRateObservation[]): BankRateObservation[] =>
   [...observations].sort((left, right) => left.date.localeCompare(right.date));
@@ -13,7 +13,7 @@ const appendChanges = (changes: BankRateChange[], observations: readonly BankRat
   }
 };
 
-// ─── Building ───────────────────────────────────────────────────────────────
+// ─── Building ──────────────────────────────────────────────────────────────
 
 export const historyFromObservations = (observations: readonly BankRateObservation[]): BankRateHistory | null => {
   const ordered = byDate(observations);
@@ -36,7 +36,7 @@ export const extendHistory = (
   return { changes, observedTo: last.date };
 };
 
-// ─── Lookup ─────────────────────────────────────────────────────────────────
+// ─── Lookup ────────────────────────────────────────────────────────────────
 
 export const changeInForce = (history: BankRateHistory, date: string): BankRateChange | null =>
   history.changes.findLast((change) => change.date <= date) ?? null;

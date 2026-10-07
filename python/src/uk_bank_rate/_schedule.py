@@ -1,14 +1,14 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 from zoneinfo import ZoneInfo
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._dates import as_aware, as_date
 from uk_bank_rate._generated import SCHEDULED_DECISION_DATES
 
-# ─── Constants ───────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 
 SCHEDULED_DECISIONS: tuple[datetime.date, ...] = SCHEDULED_DECISION_DATES
 
@@ -16,7 +16,7 @@ LONDON = ZoneInfo("Europe/London")
 
 ANNOUNCEMENT_TIME = datetime.time(12, 0)
 
-# ─── London Clock ────────────────────────────────────────────────────────────
+# ─── London Clock ───────────────────────────────────────────────────────────
 
 def _london_now(now: datetime.datetime | None) -> datetime.datetime:
     return as_aware(now).astimezone(LONDON)
@@ -24,7 +24,7 @@ def _london_now(now: datetime.datetime | None) -> datetime.datetime:
 def london_date(now: datetime.datetime | None = None) -> datetime.date:
     return _london_now(now).date()
 
-# ─── Announcements ───────────────────────────────────────────────────────────
+# ─── Announcements ──────────────────────────────────────────────────────────
 
 def is_decision_announced(decision_date: datetime.date | str, now: datetime.datetime | None = None) -> bool:
     decision = as_date(decision_date, "decision_date")

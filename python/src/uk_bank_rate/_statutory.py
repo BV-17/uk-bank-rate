@@ -1,21 +1,21 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 from decimal import Decimal
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._dates import as_date
 from uk_bank_rate._reading import rate_on
 from uk_bank_rate._types import BankRateHistory, LatePaymentRate
 
-# ─── Constants ───────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 
 LATE_PAYMENT_MARGIN = Decimal(8)
 
 LATE_PAYMENT_RULE_STARTS = datetime.date(2002, 8, 7)
 
-# ─── Late Payment ────────────────────────────────────────────────────────────
+# ─── Late Payment ───────────────────────────────────────────────────────────
 
 def _reference_date_for(starts_to_run: datetime.date) -> datetime.date:
     if starts_to_run.month <= 6:

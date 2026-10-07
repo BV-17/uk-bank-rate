@@ -1,13 +1,13 @@
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { USER_AGENT } from './generated.js';
 import { fetchBankRateObservations, seriesUrl } from './source.js';
 
-// ─── Fakes ──────────────────────────────────────────────────────────────────
+// ─── Fakes ─────────────────────────────────────────────────────────────────
 
 const answering = (body: string, status = 200): typeof globalThis.fetch =>
   async () => new Response(body, { status, headers: { 'content-type': 'application/csv' } });
@@ -21,7 +21,7 @@ const hanging: typeof globalThis.fetch = (_input, init) => new Promise((_resolve
   signal?.addEventListener('abort', () => reject(signal.reason));
 });
 
-// ─── Request ────────────────────────────────────────────────────────────────
+// ─── Request ───────────────────────────────────────────────────────────────
 
 describe('seriesUrl', () => {
   it('asks the Database for the Bank Rate series in its own date form', () => {
@@ -48,7 +48,7 @@ describe('seriesUrl', () => {
   });
 });
 
-// ─── Before Asking ──────────────────────────────────────────────────────────
+// ─── Before Asking ─────────────────────────────────────────────────────────
 
 describe('fetchBankRateObservations before it asks', () => {
   const recording = () => {
@@ -80,7 +80,7 @@ describe('fetchBankRateObservations before it asks', () => {
   });
 });
 
-// ─── Answers ────────────────────────────────────────────────────────────────
+// ─── Answers ───────────────────────────────────────────────────────────────
 
 describe('what a refusal says', () => {
   it('names itself as a BankRateSourceError', async () => {
@@ -109,7 +109,7 @@ describe('what a refusal says', () => {
   });
 });
 
-// ─── Failures on the Way ────────────────────────────────────────────────────
+// ─── Failures on the Way ───────────────────────────────────────────────────
 
 describe('fetchBankRateObservations on a bad connection', () => {
   it('reports a timeout as its own failure', async () => {

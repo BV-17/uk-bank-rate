@@ -1,4 +1,4 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 import pickle
@@ -9,15 +9,15 @@ from collections.abc import Iterator
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from typing import Any
 
-# ─── Third-Party Libraries ───────────────────────────────────────────────────
+# ─── Third-Party Libraries ──────────────────────────────────────────────────
 
 import pytest
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate import USER_AGENT, BankRateSourceError, Transport, fetch_bank_rate_observations, series_url, urllib_transport
 
-# ─── Fakes ───────────────────────────────────────────────────────────────────
+# ─── Fakes ──────────────────────────────────────────────────────────────────
 
 def _answering(body: str, status: int = 200) -> Transport:
     return lambda url, timeout: (status, body)
@@ -61,7 +61,7 @@ def local_database() -> Iterator[str]:
     server.shutdown()
     server.server_close()
 
-# ─── Request ─────────────────────────────────────────────────────────────────
+# ─── Request ────────────────────────────────────────────────────────────────
 
 def test_the_url_asks_for_the_bank_rate_series_in_the_database_date_form() -> None:
     url = urllib.parse.urlsplit(series_url("2026-09-01", datetime.date(2026, 9, 28)))
@@ -90,7 +90,7 @@ def test_the_url_says_when_a_range_ends_before_the_series_begins() -> None:
     with pytest.raises(ValueError, match="falls before the series starts on 1975-01-02"):
         series_url("1970-01-01", "1974-12-31")
 
-# ─── Before Asking ───────────────────────────────────────────────────────────
+# ─── Before Asking ──────────────────────────────────────────────────────────
 
 def test_a_range_starting_after_today_asks_nothing() -> None:
     recording = _Recording()
@@ -110,7 +110,7 @@ def test_a_timeout_that_is_not_a_positive_number_is_refused(timeout: Any) -> Non
         fetch_bank_rate_observations("2026-09-24", "2026-09-25", timeout=timeout, transport=recording)
     assert recording.requests == []
 
-# ─── Answers ─────────────────────────────────────────────────────────────────
+# ─── Answers ────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize(
     ("status", "body", "failure", "wording"),
@@ -130,14 +130,14 @@ def test_a_refusal_says_what_went_wrong(status: int, body: str, failure: str, wo
     assert raised.value.failure == failure
     assert raised.value.status == status
 
-# ─── Errors ──────────────────────────────────────────────────────────────────
+# ─── Errors ─────────────────────────────────────────────────────────────────
 
 def test_a_source_error_survives_pickling_so_it_can_cross_processes() -> None:
     error = BankRateSourceError("http", "The Bank of England Database answered HTTP 302", 302)
     restored = pickle.loads(pickle.dumps(error))
     assert (type(restored), restored.failure, str(restored), restored.status) == (BankRateSourceError, "http", str(error), 302)
 
-# ─── Failures on the Way ─────────────────────────────────────────────────────
+# ─── Failures on the Way ────────────────────────────────────────────────────
 
 @pytest.mark.parametrize(
     ("error", "failure"),
@@ -155,7 +155,7 @@ def test_a_failed_connection_names_its_failure(error: BaseException, failure: st
     assert raised.value.failure == failure
     assert raised.value.__cause__ is error
 
-# ─── Default Transport ───────────────────────────────────────────────────────
+# ─── Default Transport ──────────────────────────────────────────────────────
 
 def test_the_default_transport_names_itself_and_reads_the_answer(local_database: str) -> None:
     status, body = urllib_transport(f"{local_database}/csv", 5)

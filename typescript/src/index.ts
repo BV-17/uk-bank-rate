@@ -1,4 +1,4 @@
-// ─── Public Interface ───────────────────────────────────────────────────────
+// ─── Public Interface ──────────────────────────────────────────────────────
 
 export { fetchBankRateHistory, getBankRate } from './current.js';
 export { SCHEDULED_DECISIONS, SERIES_CODE, SERIES_STARTS_ON, USER_AGENT, bundledHistory } from './generated.js';
@@ -10,7 +10,7 @@ export { isDecisionAnnounced, isDecisionReflected, londonDate, nextScheduledDeci
 export { BankRateSourceError, fetchBankRateObservations, seriesUrl } from './source.js';
 export { latePaymentRate } from './statutory.js';
 
-// ─── Public Types ───────────────────────────────────────────────────────────
+// ─── Public Types ──────────────────────────────────────────────────────────
 
 export type {
   BankRateChange,

@@ -1,13 +1,13 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 from collections.abc import Iterable
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._types import BankRateChange, BankRateHistory, BankRateObservation
 
-# ─── Ordering ────────────────────────────────────────────────────────────────
+# ─── Ordering ───────────────────────────────────────────────────────────────
 
 def _by_date(observations: Iterable[BankRateObservation]) -> list[BankRateObservation]:
     return sorted(observations, key=lambda observation: observation.date)
@@ -17,7 +17,7 @@ def _append_changes(changes: list[BankRateChange], observations: Iterable[BankRa
         if not changes or changes[-1].rate != observation.rate:
             changes.append(BankRateChange(date=observation.date, rate=observation.rate))
 
-# ─── Building ────────────────────────────────────────────────────────────────
+# ─── Building ───────────────────────────────────────────────────────────────
 
 def history_from_observations(observations: Iterable[BankRateObservation]) -> BankRateHistory | None:
     ordered = _by_date(observations)
@@ -35,7 +35,7 @@ def extend_history(history: BankRateHistory, observations: Iterable[BankRateObse
     _append_changes(changes, newer)
     return BankRateHistory(changes=tuple(changes), observed_to=newer[-1].date)
 
-# ─── Lookup ──────────────────────────────────────────────────────────────────
+# ─── Lookup ─────────────────────────────────────────────────────────────────
 
 def change_in_force(history: BankRateHistory, on: datetime.date) -> BankRateChange | None:
     return next((change for change in reversed(history.changes) if change.date <= on), None)

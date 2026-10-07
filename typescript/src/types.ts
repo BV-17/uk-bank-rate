@@ -1,4 +1,4 @@
-// ─── Series ─────────────────────────────────────────────────────────────────
+// ─── Series ────────────────────────────────────────────────────────────────
 
 export interface BankRateObservation {
   readonly date: string;
@@ -15,7 +15,7 @@ export interface BankRateHistory {
   readonly observedTo: string;
 }
 
-// ─── Readings ───────────────────────────────────────────────────────────────
+// ─── Readings ──────────────────────────────────────────────────────────────
 
 export interface PendingDecision {
   readonly date: string;
@@ -58,7 +58,7 @@ export interface LatePaymentRate {
   readonly beyondSchedule: boolean;
 }
 
-// ─── Fetching ───────────────────────────────────────────────────────────────
+// ─── Fetching ──────────────────────────────────────────────────────────────
 
 export interface FetchOptions {
   fetch?: typeof globalThis.fetch;

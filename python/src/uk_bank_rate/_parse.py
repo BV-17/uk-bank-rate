@@ -1,15 +1,15 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 import re
 from decimal import Decimal
 from typing import NamedTuple
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._types import BankRateObservation
 
-# ─── Constants ───────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 
 MONTH_NUMBERS = {
     "jan": 1, "feb": 2, "mar": 3, "apr": 4, "may": 5, "jun": 6,
@@ -28,7 +28,7 @@ FIELD_SEPARATOR = re.compile(r"[\t,]")
 
 EDGE_BLANKS = " \t"
 
-# ─── Dates ───────────────────────────────────────────────────────────────────
+# ─── Dates ──────────────────────────────────────────────────────────────────
 
 def _full_year(digits: str) -> int:
     year = int(digits)
@@ -49,7 +49,7 @@ def date_from_series_date(raw: str) -> datetime.date | None:
     except ValueError:
         return None
 
-# ─── CSV ─────────────────────────────────────────────────────────────────────
+# ─── CSV ────────────────────────────────────────────────────────────────────
 
 def _observation_from(line: str) -> BankRateObservation | None:
     fields = FIELD_SEPARATOR.split(line)

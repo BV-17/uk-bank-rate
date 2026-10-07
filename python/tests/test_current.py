@@ -1,19 +1,19 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 import urllib.parse
 from decimal import Decimal
 from typing import Any
 
-# ─── Third-Party Libraries ───────────────────────────────────────────────────
+# ─── Third-Party Libraries ──────────────────────────────────────────────────
 
 import pytest
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate import BankRateChange, BankRateHistory, PendingDecision, bundled_history, get_bank_rate
 
-# ─── Fixtures ────────────────────────────────────────────────────────────────
+# ─── Fixtures ───────────────────────────────────────────────────────────────
 
 HISTORY = BankRateHistory(
     changes=(
@@ -35,7 +35,7 @@ class _Serving:
 def _at(iso: str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(iso)
 
-# ─── Current Rate ────────────────────────────────────────────────────────────
+# ─── Current Rate ───────────────────────────────────────────────────────────
 
 def test_only_the_days_after_the_history_are_fetched_with_a_week_of_overlap() -> None:
     serving = _Serving("DATE,IUDBEDR\n25 Sep 2026,3.75\n")

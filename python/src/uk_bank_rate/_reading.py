@@ -1,15 +1,15 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._dates import as_aware, as_date
 from uk_bank_rate._history import change_in_force
 from uk_bank_rate._schedule import SCHEDULED_DECISIONS, is_decision_announced, is_decision_reflected
 from uk_bank_rate._types import BankRateHistory, BankRateReading, PendingDecision
 
-# ─── Pending Decisions ───────────────────────────────────────────────────────
+# ─── Pending Decisions ──────────────────────────────────────────────────────
 
 def pending_decision_by(
     history: BankRateHistory, day: datetime.date, now: datetime.datetime,
@@ -28,7 +28,7 @@ def pending_decision_by(
 def is_beyond_schedule(history: BankRateHistory, day: datetime.date) -> bool:
     return day > history.observed_to and (not SCHEDULED_DECISIONS or day > SCHEDULED_DECISIONS[-1])
 
-# ─── Readings ────────────────────────────────────────────────────────────────
+# ─── Readings ───────────────────────────────────────────────────────────────
 
 def rate_on(
     history: BankRateHistory, on: datetime.date | str, now: datetime.datetime | None = None,

@@ -1,13 +1,13 @@
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { rateOn } from './reading.js';
 import { isDecisionAnnounced, isDecisionReflected } from './schedule.js';
 
-// ─── Validation ─────────────────────────────────────────────────────────────
+// ─── Validation ────────────────────────────────────────────────────────────
 
 describe('dates that are not ISO', () => {
   const history = { changes: [{ date: '2025-12-18', rate: 3.75 }], observedTo: '2026-09-25' };

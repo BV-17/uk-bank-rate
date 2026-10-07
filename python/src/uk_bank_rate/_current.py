@@ -1,8 +1,8 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._bundled import bundled_history
 from uk_bank_rate._dates import as_aware
@@ -13,11 +13,11 @@ from uk_bank_rate._generated import SERIES_STARTS_ON
 from uk_bank_rate._source import DEFAULT_TIMEOUT_SECONDS, fetch_bank_rate_observations
 from uk_bank_rate._types import BankRateHistory, CurrentBankRate, Transport
 
-# ─── Constants ───────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 
 OVERLAP = datetime.timedelta(days=7)
 
-# ─── History ─────────────────────────────────────────────────────────────────
+# ─── History ────────────────────────────────────────────────────────────────
 
 def fetch_bank_rate_history(
     *,
@@ -35,7 +35,7 @@ def fetch_bank_rate_history(
     recent = fetch_bank_rate_observations(start, today, now=moment, timeout=timeout, transport=transport)
     return extend_history(base, recent)
 
-# ─── Current Rate ────────────────────────────────────────────────────────────
+# ─── Current Rate ───────────────────────────────────────────────────────────
 
 def get_bank_rate(
     *,

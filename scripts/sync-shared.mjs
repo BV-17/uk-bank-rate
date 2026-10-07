@@ -1,10 +1,10 @@
-// ─── Node Standard Library ──────────────────────────────────────────────────
+// ─── Node Standard Library ─────────────────────────────────────────────────
 
 import { readFile, writeFile } from 'node:fs/promises';
 import { relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// ─── Paths ──────────────────────────────────────────────────────────────────
+// ─── Paths ─────────────────────────────────────────────────────────────────
 
 const ROOT = new URL('../', import.meta.url);
 const at = (path) => new URL(path, ROOT);
@@ -22,7 +22,7 @@ const PYTHON_VERSION = at('python/src/uk_bank_rate/_version.py');
 const LICENCE = at('LICENSE');
 const LICENCE_COPIES = [at('typescript/LICENSE'), at('python/LICENSE')];
 
-// ─── Validation ─────────────────────────────────────────────────────────────
+// ─── Validation ────────────────────────────────────────────────────────────
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DECIMAL = /^-?\d+(?:\.\d+)?$/;
@@ -71,9 +71,9 @@ const validateVersions = async () => {
   }
 };
 
-// ─── Rendering ──────────────────────────────────────────────────────────────
+// ─── Rendering ─────────────────────────────────────────────────────────────
 
-const HEADER_WIDTH = 79;
+const HEADER_WIDTH = 78;
 
 const header = (marker, label) => `${marker} ─── ${label} ${'─'.repeat(HEADER_WIDTH - marker.length - label.length - 6)}`;
 
@@ -157,7 +157,7 @@ const pythonHistorySource = ({ changes, observedTo }) => [
   '',
 ].join('\n');
 
-// ─── Sync ───────────────────────────────────────────────────────────────────
+// ─── Sync ──────────────────────────────────────────────────────────────────
 
 const checkOnly = process.argv.includes('--check');
 const changes = JSON.parse(await readFile(SHARED_CHANGES, 'utf8'));

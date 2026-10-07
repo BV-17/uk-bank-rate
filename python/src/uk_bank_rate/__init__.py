@@ -1,4 +1,4 @@
-# ─── Public Interface ────────────────────────────────────────────────────────
+# ─── Public Interface ───────────────────────────────────────────────────────
 
 from uk_bank_rate._bundled import bundled_history
 from uk_bank_rate._current import fetch_bank_rate_history, get_bank_rate
@@ -31,7 +31,7 @@ from uk_bank_rate._types import (
 )
 from uk_bank_rate._version import VERSION
 
-# ─── Metadata ────────────────────────────────────────────────────────────────
+# ─── Metadata ───────────────────────────────────────────────────────────────
 
 __version__ = VERSION
 

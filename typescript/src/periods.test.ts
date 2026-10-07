@@ -1,13 +1,13 @@
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { bundledHistory } from './generated.js';
 import { ratesBetween } from './periods.js';
 
-// ─── Refusals ───────────────────────────────────────────────────────────────
+// ─── Refusals ──────────────────────────────────────────────────────────────
 
 describe('ratesBetween', () => {
   it('refuses a span that ends before it starts', () => {

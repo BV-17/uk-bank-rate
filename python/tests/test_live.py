@@ -1,17 +1,17 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 import os
 
-# ─── Third-Party Libraries ───────────────────────────────────────────────────
+# ─── Third-Party Libraries ──────────────────────────────────────────────────
 
 import pytest
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate import bundled_history, fetch_bank_rate_observations, london_date, rate_on
 
-# ─── Live Database ───────────────────────────────────────────────────────────
+# ─── Live Database ──────────────────────────────────────────────────────────
 
 pytestmark = pytest.mark.skipif(not os.environ.get("LIVE"), reason="set LIVE=1 to query the Bank of England Database")
 

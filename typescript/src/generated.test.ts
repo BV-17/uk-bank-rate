@@ -1,12 +1,12 @@
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { SCHEDULED_DECISIONS, SERIES_STARTS_ON, bundledHistory } from './generated.js';
 
-// ─── Bundled History ────────────────────────────────────────────────────────
+// ─── Bundled History ───────────────────────────────────────────────────────
 
 describe('bundledHistory', () => {
   it('starts where the series starts', () => {
@@ -46,7 +46,7 @@ describe('bundledHistory', () => {
   });
 });
 
-// ─── Scheduled Decisions ────────────────────────────────────────────────────
+// ─── Scheduled Decisions ───────────────────────────────────────────────────
 
 describe('SCHEDULED_DECISIONS', () => {
   it('is in date order with no repeats', () => {

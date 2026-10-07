@@ -1,4 +1,4 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { assertIsoDate } from './dates.js';
 import { SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT } from './generated.js';
@@ -8,7 +8,7 @@ import { londonDate } from './schedule.js';
 import type { SeriesTable } from './parse.js';
 import type { BankRateObservation, FetchOptions, SourceFailure } from './types.js';
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 const DEFAULT_TIMEOUT_MS = 15_000;
 
@@ -16,7 +16,7 @@ const MONTH_ABBREVIATIONS = [
   'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ] as const;
 
-// ─── Errors ─────────────────────────────────────────────────────────────────
+// ─── Errors ────────────────────────────────────────────────────────────────
 
 export class BankRateSourceError extends Error {
   readonly failure: SourceFailure;
@@ -30,7 +30,7 @@ export class BankRateSourceError extends Error {
   }
 }
 
-// ─── Request ────────────────────────────────────────────────────────────────
+// ─── Request ───────────────────────────────────────────────────────────────
 
 const seriesDateParameter = (isoDate: string): string => {
   const [year = '', month = '', day = ''] = isoDate.split('-');
@@ -58,7 +58,7 @@ export const seriesUrl = (start: string, end: string): string => {
   return `${SERIES_ENDPOINT}?${parameters.toString()}`;
 };
 
-// ─── Response ───────────────────────────────────────────────────────────────
+// ─── Response ──────────────────────────────────────────────────────────────
 
 const statusExplanation = (status: number): string => {
   if (status === 0 || (status >= 300 && status < 400)) return ', redirecting to its error page';
@@ -87,7 +87,7 @@ const readSeriesBody = (status: number, body: string): BankRateObservation[] => 
   return table.observations;
 };
 
-// ─── Fetch ──────────────────────────────────────────────────────────────────
+// ─── Fetch ─────────────────────────────────────────────────────────────────
 
 const messageOf = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 

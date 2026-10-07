@@ -1,4 +1,4 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { shiftIsoDate } from './dates.js';
 import { SERIES_STARTS_ON, bundledHistory } from './generated.js';
@@ -9,11 +9,11 @@ import { fetchBankRateObservations } from './source.js';
 
 import type { BankRateHistory, CurrentBankRate, CurrentBankRateOptions } from './types.js';
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 const OVERLAP_DAYS = 7;
 
-// ─── History ────────────────────────────────────────────────────────────────
+// ─── History ───────────────────────────────────────────────────────────────
 
 export const fetchBankRateHistory = async (options: CurrentBankRateOptions = {}): Promise<BankRateHistory> => {
   const base = options.history ?? bundledHistory;
@@ -25,7 +25,7 @@ export const fetchBankRateHistory = async (options: CurrentBankRateOptions = {})
   return extendHistory(base, recent);
 };
 
-// ─── Current Rate ───────────────────────────────────────────────────────────
+// ─── Current Rate ──────────────────────────────────────────────────────────
 
 export const getBankRate = async (options: CurrentBankRateOptions = {}): Promise<CurrentBankRate> => {
   const now = options.now ?? new Date();

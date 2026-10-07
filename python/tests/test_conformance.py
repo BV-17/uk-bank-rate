@@ -1,4 +1,4 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 import json
@@ -7,11 +7,11 @@ from decimal import Decimal
 from pathlib import Path
 from typing import Any
 
-# ─── Third-Party Libraries ───────────────────────────────────────────────────
+# ─── Third-Party Libraries ──────────────────────────────────────────────────
 
 import pytest
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate import (
     BankRateChange,
@@ -35,7 +35,7 @@ from uk_bank_rate import (
     rates_between,
 )
 
-# ─── Shared Cases ────────────────────────────────────────────────────────────
+# ─── Shared Cases ───────────────────────────────────────────────────────────
 
 CASES = json.loads((Path(__file__).resolve().parents[2] / "shared" / "conformance.json").read_text(encoding="utf-8"))
 
@@ -60,7 +60,7 @@ def _pending(shape: dict[str, Any] | None) -> PendingDecision | None:
         return None
     return PendingDecision(date=datetime.date.fromisoformat(shape["date"]), announced=shape["announced"])
 
-# ─── Parsing ─────────────────────────────────────────────────────────────────
+# ─── Parsing ────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("seriesDates"))
 def test_series_dates(case: dict[str, Any]) -> None:
@@ -70,7 +70,7 @@ def test_series_dates(case: dict[str, Any]) -> None:
 def test_csv(case: dict[str, Any]) -> None:
     assert parse_bank_rate_csv(case["input"]) == _observations(case["expected"])
 
-# ─── History ─────────────────────────────────────────────────────────────────
+# ─── History ────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("historyFromObservations"))
 def test_building_a_history(case: dict[str, Any]) -> None:
@@ -81,7 +81,7 @@ def test_building_a_history(case: dict[str, Any]) -> None:
 def test_extending_a_history(case: dict[str, Any]) -> None:
     assert extend_history(_history(case["history"]), _observations(case["observations"])) == _history(case["expected"])
 
-# ─── Schedule ────────────────────────────────────────────────────────────────
+# ─── Schedule ───────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("londonDates"))
 def test_the_london_date(case: dict[str, Any]) -> None:
@@ -99,7 +99,7 @@ def test_reflections(case: dict[str, Any]) -> None:
 def test_the_next_decision(case: dict[str, Any]) -> None:
     assert next_scheduled_decision(_moment(case["now"])) == _day(case["expected"])
 
-# ─── Readings ────────────────────────────────────────────────────────────────
+# ─── Readings ───────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("readings"))
 def test_readings(case: dict[str, Any]) -> None:
@@ -115,7 +115,7 @@ def test_readings(case: dict[str, Any]) -> None:
     assert reading.pending_decision == _pending(expected["pendingDecision"])
     assert reading.beyond_schedule is expected["beyondSchedule"]
 
-# ─── Periods ─────────────────────────────────────────────────────────────────
+# ─── Periods ────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("periods"))
 def test_periods(case: dict[str, Any]) -> None:
@@ -133,7 +133,7 @@ def test_periods(case: dict[str, Any]) -> None:
     assert span.pending_decision == _pending(expected["pendingDecision"])
     assert span.beyond_schedule is expected["beyondSchedule"]
 
-# ─── Late Payment ────────────────────────────────────────────────────────────
+# ─── Late Payment ───────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("latePaymentRates"))
 def test_late_payment_rates(case: dict[str, Any]) -> None:
@@ -152,7 +152,7 @@ def test_late_payment_rates(case: dict[str, Any]) -> None:
         beyond_schedule=expected["beyondSchedule"],
     ))
 
-# ─── Answers ─────────────────────────────────────────────────────────────────
+# ─── Answers ────────────────────────────────────────────────────────────────
 
 @pytest.mark.parametrize("case", _cases("answers"))
 def test_answers(case: dict[str, Any]) -> None:
@@ -165,7 +165,7 @@ def test_answers(case: dict[str, Any]) -> None:
         fetch_bank_rate_observations("2026-09-24", "2026-09-25", transport=transport)
     assert (raised.value.failure, raised.value.status) == (case["failure"], case["status"])
 
-# ─── Failures on the Way ─────────────────────────────────────────────────────
+# ─── Failures on the Way ────────────────────────────────────────────────────
 
 class _ClientTimeout(Exception):
     pass

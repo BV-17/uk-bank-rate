@@ -1,4 +1,4 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { assertIsoDate } from './dates.js';
 import { SCHEDULED_DECISIONS } from './generated.js';
@@ -7,7 +7,7 @@ import { isDecisionAnnounced, isDecisionReflected } from './schedule.js';
 
 import type { BankRateHistory, BankRateReading, PendingDecision } from './types.js';
 
-// ─── Pending Decisions ──────────────────────────────────────────────────────
+// ─── Pending Decisions ─────────────────────────────────────────────────────
 
 export const pendingDecisionBy = (history: BankRateHistory, date: string, now: Date): PendingDecision | null => {
   const decisionDate = SCHEDULED_DECISIONS.find(
@@ -19,7 +19,7 @@ export const pendingDecisionBy = (history: BankRateHistory, date: string, now: D
 export const isBeyondSchedule = (history: BankRateHistory, date: string): boolean =>
   date > history.observedTo && date > (SCHEDULED_DECISIONS.at(-1) ?? '');
 
-// ─── Readings ───────────────────────────────────────────────────────────────
+// ─── Readings ──────────────────────────────────────────────────────────────
 
 export const rateOn = (history: BankRateHistory, date: string, now: Date = new Date()): BankRateReading | null => {
   assertIsoDate(date, 'date');

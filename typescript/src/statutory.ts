@@ -1,17 +1,17 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { assertIsoDate } from './dates.js';
 import { rateOn } from './reading.js';
 
 import type { BankRateHistory, LatePaymentRate } from './types.js';
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 const LATE_PAYMENT_MARGIN = 8;
 
 const LATE_PAYMENT_RULE_STARTS = '2002-08-07';
 
-// ─── Late Payment ───────────────────────────────────────────────────────────
+// ─── Late Payment ──────────────────────────────────────────────────────────
 
 const referenceDateFor = (startsToRun: string): string => {
   const year = Number(startsToRun.slice(0, 4));

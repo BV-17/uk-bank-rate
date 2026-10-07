@@ -1,17 +1,17 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 from decimal import Decimal
 
-# ─── Third-Party Libraries ───────────────────────────────────────────────────
+# ─── Third-Party Libraries ──────────────────────────────────────────────────
 
 import pytest
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate import SCHEDULED_DECISIONS, SERIES_STARTS_ON, BankRateChange, __version__, bundled_history
 
-# ─── Bundled History ─────────────────────────────────────────────────────────
+# ─── Bundled History ────────────────────────────────────────────────────────
 
 def test_the_bundled_history_starts_where_the_series_starts() -> None:
     assert bundled_history.changes[0].date == SERIES_STARTS_ON
@@ -40,7 +40,7 @@ def test_the_bundled_history_was_observed_no_earlier_than_its_last_change() -> N
 def test_the_bundled_history_carries_known_changes(changed_on: str, rate: str) -> None:
     assert BankRateChange(date=datetime.date.fromisoformat(changed_on), rate=Decimal(rate)) in bundled_history.changes
 
-# ─── Scheduled Decisions ─────────────────────────────────────────────────────
+# ─── Scheduled Decisions ────────────────────────────────────────────────────
 
 def test_the_schedule_is_in_date_order_with_no_repeats() -> None:
     assert list(SCHEDULED_DECISIONS) == sorted(set(SCHEDULED_DECISIONS))
@@ -48,7 +48,7 @@ def test_the_schedule_is_in_date_order_with_no_repeats() -> None:
 def test_every_scheduled_decision_falls_on_a_thursday() -> None:
     assert {decision.isoweekday() for decision in SCHEDULED_DECISIONS} == {4}
 
-# ─── Metadata ────────────────────────────────────────────────────────────────
+# ─── Metadata ───────────────────────────────────────────────────────────────
 
 def test_the_version_is_a_release_number() -> None:
     assert all(part.isdigit() for part in __version__.split("."))

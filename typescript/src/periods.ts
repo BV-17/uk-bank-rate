@@ -1,4 +1,4 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { assertIsoDate, daysBetween, shiftIsoDate } from './dates.js';
 import { changeInForce } from './history.js';
@@ -6,7 +6,7 @@ import { isBeyondSchedule, pendingDecisionBy } from './reading.js';
 
 import type { BankRateChange, BankRateHistory, BankRatePeriod, BankRatePeriods } from './types.js';
 
-// ─── Periods ────────────────────────────────────────────────────────────────
+// ─── Periods ───────────────────────────────────────────────────────────────
 
 const periodsOf = (changes: readonly BankRateChange[], end: string): BankRatePeriod[] =>
   changes.map((change, index) => {

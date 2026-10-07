@@ -1,12 +1,12 @@
-// ─── Node Standard Library ──────────────────────────────────────────────────
+// ─── Node Standard Library ─────────────────────────────────────────────────
 
 import { readFileSync } from 'node:fs';
 
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { extendHistory, historyFromObservations } from './history.js';
 import { isoFromSeriesDate, parseBankRateCsv } from './parse.js';
@@ -25,7 +25,7 @@ import type {
   SourceFailure,
 } from './types.js';
 
-// ─── Case Shapes ────────────────────────────────────────────────────────────
+// ─── Case Shapes ───────────────────────────────────────────────────────────
 
 type Row = [string, string];
 
@@ -78,7 +78,7 @@ interface ConformanceCases {
   connectionFailures: (NamedCase & { timeoutMs: number; failsAfterMs: number; failure: SourceFailure })[];
 }
 
-// ─── Shared Cases ───────────────────────────────────────────────────────────
+// ─── Shared Cases ──────────────────────────────────────────────────────────
 
 const CASES = JSON.parse(
   readFileSync(new URL('../../shared/conformance.json', import.meta.url), 'utf8'),
@@ -117,7 +117,7 @@ const failingAfter = (delayMs: number): typeof globalThis.fetch => async () => {
   throw new ClientTimeout('the client gave up');
 };
 
-// ─── Parsing ────────────────────────────────────────────────────────────────
+// ─── Parsing ───────────────────────────────────────────────────────────────
 
 describe('series dates', () => {
   it.each(CASES.seriesDates)('$input', ({ input, expected }) => {
@@ -131,7 +131,7 @@ describe('CSV', () => {
   });
 });
 
-// ─── History ────────────────────────────────────────────────────────────────
+// ─── History ───────────────────────────────────────────────────────────────
 
 describe('building a history', () => {
   it.each(CASES.historyFromObservations)('$name', ({ observations, expected }) => {
@@ -145,7 +145,7 @@ describe('extending a history', () => {
   });
 });
 
-// ─── Schedule ───────────────────────────────────────────────────────────────
+// ─── Schedule ──────────────────────────────────────────────────────────────
 
 describe('the London date', () => {
   it.each(CASES.londonDates)('$name', ({ now, expected }) => {
@@ -171,7 +171,7 @@ describe('the next decision', () => {
   });
 });
 
-// ─── Readings ───────────────────────────────────────────────────────────────
+// ─── Readings ──────────────────────────────────────────────────────────────
 
 describe('readings', () => {
   it.each(CASES.readings)('$name', ({ history, date, now, expected }) => {
@@ -179,7 +179,7 @@ describe('readings', () => {
   });
 });
 
-// ─── Periods ────────────────────────────────────────────────────────────────
+// ─── Periods ───────────────────────────────────────────────────────────────
 
 describe('periods', () => {
   it.each(CASES.periods)('$name', ({ history, start, end, now, expected }) => {
@@ -187,7 +187,7 @@ describe('periods', () => {
   });
 });
 
-// ─── Late Payment ───────────────────────────────────────────────────────────
+// ─── Late Payment ──────────────────────────────────────────────────────────
 
 describe('late payment rates', () => {
   it.each(CASES.latePaymentRates)('$name', ({ history, startsToRun, now, expected, refused }) => {
@@ -197,7 +197,7 @@ describe('late payment rates', () => {
   });
 });
 
-// ─── Answers ────────────────────────────────────────────────────────────────
+// ─── Answers ───────────────────────────────────────────────────────────────
 
 describe('answers from the Database', () => {
   it.each(CASES.answers)('$name', async ({ status, body, expected, failure }) => {
@@ -207,7 +207,7 @@ describe('answers from the Database', () => {
   });
 });
 
-// ─── Failures on the Way ────────────────────────────────────────────────────
+// ─── Failures on the Way ───────────────────────────────────────────────────
 
 describe('failures on the way to the Database', () => {
   it.each(CASES.connectionFailures)('$name', async ({ timeoutMs, failsAfterMs, failure }) => {

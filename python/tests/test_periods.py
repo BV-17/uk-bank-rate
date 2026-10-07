@@ -1,16 +1,16 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 
-# ─── Third-Party Libraries ───────────────────────────────────────────────────
+# ─── Third-Party Libraries ──────────────────────────────────────────────────
 
 import pytest
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate import bundled_history, rates_between
 
-# ─── Refusals ────────────────────────────────────────────────────────────────
+# ─── Refusals ───────────────────────────────────────────────────────────────
 
 def test_a_span_that_ends_before_it_starts_is_refused() -> None:
     with pytest.raises(ValueError, match="falls before start"):

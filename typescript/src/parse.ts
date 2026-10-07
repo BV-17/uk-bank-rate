@@ -1,10 +1,10 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { isRealDate } from './dates.js';
 
 import type { BankRateObservation } from './types.js';
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────
 
 const MONTH_NUMBERS: Readonly<Record<string, string>> = {
   jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
@@ -23,11 +23,11 @@ const FIELD_SEPARATOR = /[\t,]/;
 
 const EDGE_BLANKS = /^[ \t]+|[ \t]+$/g;
 
-// ─── Text ───────────────────────────────────────────────────────────────────
+// ─── Text ──────────────────────────────────────────────────────────────────
 
 const trimmed = (text: string): string => text.replace(EDGE_BLANKS, '');
 
-// ─── Dates ──────────────────────────────────────────────────────────────────
+// ─── Dates ─────────────────────────────────────────────────────────────────
 
 const fullYear = (digits: string): number => {
   const year = Number(digits);
@@ -47,7 +47,7 @@ export const isoFromSeriesDate = (raw: string): string | null => {
   return `${year}-${month}-${String(day).padStart(2, '0')}`;
 };
 
-// ─── CSV ────────────────────────────────────────────────────────────────────
+// ─── CSV ───────────────────────────────────────────────────────────────────
 
 const observationFrom = (line: string): BankRateObservation | null => {
   const [dateField = '', rateField = ''] = line.split(FIELD_SEPARATOR);

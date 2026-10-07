@@ -1,8 +1,8 @@
-// ─── Third-Party Libraries ──────────────────────────────────────────────────
+// ─── Third-Party Libraries ─────────────────────────────────────────────────
 
 import { describe, expect, it } from 'vitest';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { shiftIsoDate } from './dates.js';
 import { SCHEDULED_DECISIONS, bundledHistory } from './generated.js';
@@ -10,7 +10,7 @@ import { rateOn } from './reading.js';
 import { londonDate } from './schedule.js';
 import { fetchBankRateObservations } from './source.js';
 
-// ─── Live Database ──────────────────────────────────────────────────────────
+// ─── Live Database ─────────────────────────────────────────────────────────
 
 describe.skipIf(!process.env['LIVE'])('the live Bank of England Database', () => {
   it('answers with recent observations, none more than ten days old', async () => {

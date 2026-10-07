@@ -1,4 +1,4 @@
-# ─── Python Standard Library ─────────────────────────────────────────────────
+# ─── Python Standard Library ────────────────────────────────────────────────
 
 import datetime
 import math
@@ -9,7 +9,7 @@ import urllib.request
 from email.message import Message
 from typing import IO
 
-# ─── Local Application Imports ───────────────────────────────────────────────
+# ─── Local Application Imports ──────────────────────────────────────────────
 
 from uk_bank_rate._dates import as_date
 from uk_bank_rate._generated import SERIES_CODE, SERIES_ENDPOINT, SERIES_STARTS_ON, USER_AGENT
@@ -17,13 +17,13 @@ from uk_bank_rate._parse import SeriesTable, columns_of, read_series_table
 from uk_bank_rate._schedule import london_date
 from uk_bank_rate._types import BankRateObservation, SourceFailure, Transport
 
-# ─── Constants ───────────────────────────────────────────────────────────────
+# ─── Constants ──────────────────────────────────────────────────────────────
 
 DEFAULT_TIMEOUT_SECONDS = 15.0
 
 MONTH_ABBREVIATIONS = ("Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec")
 
-# ─── Errors ──────────────────────────────────────────────────────────────────
+# ─── Errors ─────────────────────────────────────────────────────────────────
 
 class BankRateSourceError(Exception):
     def __init__(self, failure: SourceFailure, message: str, status: int | None = None) -> None:
@@ -34,7 +34,7 @@ class BankRateSourceError(Exception):
     def __reduce__(self) -> tuple[type["BankRateSourceError"], tuple[SourceFailure, str, int | None]]:
         return type(self), (self.failure, str(self), self.status)
 
-# ─── Request ─────────────────────────────────────────────────────────────────
+# ─── Request ────────────────────────────────────────────────────────────────
 
 def _series_date_parameter(day: datetime.date) -> str:
     return f"{day.day:02d}/{MONTH_ABBREVIATIONS[day.month - 1]}/{day.year}"
@@ -58,7 +58,7 @@ def series_url(start: datetime.date | str, end: datetime.date | str) -> str:
     }
     return f"{SERIES_ENDPOINT}?{urllib.parse.urlencode(parameters)}"
 
-# ─── Transport ───────────────────────────────────────────────────────────────
+# ─── Transport ──────────────────────────────────────────────────────────────
 
 class _RefuseRedirects(urllib.request.HTTPRedirectHandler):
     def redirect_request(
@@ -77,7 +77,7 @@ def urllib_transport(url: str, timeout: float) -> tuple[int, str]:
         with error:
             return error.code, error.read().decode("utf-8", errors="replace")
 
-# ─── Response ────────────────────────────────────────────────────────────────
+# ─── Response ───────────────────────────────────────────────────────────────
 
 def _status_explanation(status: int) -> str:
     if status == 0 or 300 <= status < 400:
@@ -107,7 +107,7 @@ def _read_series_body(status: int, body: str) -> list[BankRateObservation]:
         raise BankRateSourceError(refused[0], f"The Bank of England Database {refused[1]}", status)
     return table.observations
 
-# ─── Fetch ───────────────────────────────────────────────────────────────────
+# ─── Fetch ──────────────────────────────────────────────────────────────────
 
 def _check_timeout(timeout: float) -> None:
     if not isinstance(timeout, (int, float)) or not math.isfinite(timeout) or timeout <= 0:

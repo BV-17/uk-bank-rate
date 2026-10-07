@@ -1,8 +1,8 @@
-// ─── Node Standard Library ──────────────────────────────────────────────────
+// ─── Node Standard Library ─────────────────────────────────────────────────
 
 import { readFile, writeFile } from 'node:fs/promises';
 
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import {
   SERIES_CODE,
@@ -12,7 +12,7 @@ import {
   londonDate,
 } from '../typescript/dist/index.js';
 
-// ─── Refresh ────────────────────────────────────────────────────────────────
+// ─── Refresh ───────────────────────────────────────────────────────────────
 
 const SHARED_CHANGES = new URL('../shared/bank-rate-changes.json', import.meta.url);
 

@@ -1,9 +1,9 @@
-// ─── Local Application Imports ──────────────────────────────────────────────
+// ─── Local Application Imports ─────────────────────────────────────────────
 
 import { assertIsoDate } from './dates.js';
 import { SCHEDULED_DECISIONS } from './generated.js';
 
-// ─── London Clock ───────────────────────────────────────────────────────────
+// ─── London Clock ──────────────────────────────────────────────────────────
 
 interface LondonClock {
   date: string;
@@ -33,7 +33,7 @@ const readLondonClock = (now: Date): LondonClock => {
 
 export const londonDate = (now: Date = new Date()): string => readLondonClock(now).date;
 
-// ─── Announcements ──────────────────────────────────────────────────────────
+// ─── Announcements ─────────────────────────────────────────────────────────
 
 export const isDecisionAnnounced = (decisionDate: string, now: Date = new Date()): boolean => {
   assertIsoDate(decisionDate, 'decisionDate');
