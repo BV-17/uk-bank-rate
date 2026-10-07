@@ -300,6 +300,6 @@ const CHANGES: readonly (readonly [string, number])[] = [
 // ─── Bundled History ───────────────────────────────────────────────────────
 
 export const bundledHistory: BankRateHistory = Object.freeze({
-  observedTo: '2026-09-28',
+  observedTo: '2026-10-06',
   changes: Object.freeze(CHANGES.map(([date, rate]) => Object.freeze({ date, rate }))),
 });

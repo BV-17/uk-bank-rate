@@ -4,6 +4,13 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-10-07
+
+### Changed
+
+- The bundled history is refreshed to 6 October 2026; Bank Rate is unchanged at 3.75% since 18 December 2025
+- The section header comments in both packages now end at column 78, and no code changed
+
 ## [0.4.0] - 2026-09-29
 
 ### Added
