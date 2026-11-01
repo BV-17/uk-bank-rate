@@ -4,6 +4,13 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.4.2] - 2026-11-01
+
+### Changed
+
+- The bundled history is refreshed to 29 October 2026; Bank Rate is unchanged at 3.75% since 18 December 2025
+- The test toolchain moves to vitest 5.0.5, past advisories in `@vitest/mocker` and Vite; neither package depends on either when it runs, so no published version carried them
+
 ## [0.4.1] - 2026-10-07
 
 ### Changed
