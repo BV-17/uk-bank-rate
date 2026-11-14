@@ -4,6 +4,12 @@ All notable changes to both packages are recorded here. The TypeScript and Pytho
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-11-14
+
+### Changed
+
+- The bundled history is refreshed to 12 November 2026 and carries the Monetary Policy Committee's rise from 3.75% to 4% on 5 November 2026, so an offline reading from 5 November answers 4%, where 0.4.2 answered 3.75% with that decision flagged as announced and pending
+
 ## [0.4.2] - 2026-11-01
 
 ### Changed

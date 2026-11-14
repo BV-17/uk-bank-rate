@@ -295,11 +295,12 @@ const CHANGES: readonly (readonly [string, number])[] = [
   ['2025-05-08', 4.25],
   ['2025-08-07', 4],
   ['2025-12-18', 3.75],
+  ['2026-11-05', 4],
 ];
 
 // ─── Bundled History ───────────────────────────────────────────────────────
 
 export const bundledHistory: BankRateHistory = Object.freeze({
-  observedTo: '2026-10-29',
+  observedTo: '2026-11-12',
   changes: Object.freeze(CHANGES.map(([date, rate]) => Object.freeze({ date, rate }))),
 });

@@ -265,6 +265,7 @@ BUNDLED_CHANGES: tuple[tuple[datetime.date, Decimal], ...] = (
     (datetime.date(2025, 5, 8), Decimal("4.25")),
     (datetime.date(2025, 8, 7), Decimal("4")),
     (datetime.date(2025, 12, 18), Decimal("3.75")),
+    (datetime.date(2026, 11, 5), Decimal("4")),
 )
 
-BUNDLED_OBSERVED_TO = datetime.date(2026, 10, 29)
+BUNDLED_OBSERVED_TO = datetime.date(2026, 11, 12)
